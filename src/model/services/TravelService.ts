@@ -1,29 +1,38 @@
-// model/service/TravelService.ts
-
 import { supabase } from "../../infra/supabase/supabase";
 import { TravelRepository } from "../repositories/TravelRepository";
+import { OfflineStorageService } from "./OfflineStorageService";
+import { Travel } from "../entities/Travel";
 
 export class TravelService {
-  [x: string]: any;
   private repository: TravelRepository;
+  private offline: OfflineStorageService;
 
   constructor() {
     this.repository = new TravelRepository();
+    this.offline = new OfflineStorageService();
   }
 
   async listAllTravels() {
-    return await this.repository.getAllTravels();
+    const data = await this.repository.getAllTravels();
+    if (data.length > 0) {
+      await this.offline.setCachedTrips(data);
+    }
+    return data.length > 0 ? data : await this.offline.getCachedTrips();
   }
 
   async listSavedTravels() {
-    return await this.repository.getSavedTravels();
+    const remote = await this.repository.getSavedTravels();
+    if (remote.length > 0) {
+      await this.offline.setSavedTrips(remote);
+      return remote;
+    }
+    return await this.offline.getSavedTrips();
   }
-  // TravelService.ts
 
 async updateSavedStatus(id: string, saved: boolean) {
     const { error } = await supabase
       .from("viagem")
-    .update({ salvo: saved }) // <<< SUA COLUNA NO BD É 'salvo', não 'saved'
+    .update({ salvo: saved }) 
       .eq("id", id);
 
     if (error) {
@@ -33,5 +42,4 @@ async updateSavedStatus(id: string, saved: boolean) {
 
     return true;
   }
-
 }
