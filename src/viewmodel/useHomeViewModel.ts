@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Travel } from "../model/entities/Travel";
-import { TravelRepository } from "../model/repositories/TravelRepository";
+import { TravelService } from "../model/services/TravelService";
 
 export const HomeViewModel = () => {
-  const repo = new TravelRepository();
+  const service = new TravelService();
 
   const [travelData, setTravelData] = useState<Travel[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadTravels = async () => {
     setLoading(true);
-    const travels = await repo.getAllTravels();
+    const travels = await service.listAllTravels();
     setTravelData(travels);
     setLoading(false);
   };
