@@ -51,7 +51,7 @@ export default function SavedTripsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#e8e8e4" },
 
   header: {
     flexDirection: "row",

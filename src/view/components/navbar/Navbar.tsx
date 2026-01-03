@@ -11,31 +11,34 @@ export default function Navbar() {
       <View style={styles.row}>
         {/* Logo */}
         <View style={styles.logo} />
-        <View>
+
+        <View style={styles.titleContainer}>
           <Text style={styles.title}>D&E Turismo</Text>
         </View>
 
-        <View style={styles.row}>
-          {/* Notificações */}
-          <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-            <Feather name="bell" size={24} color="#333" />
-          </TouchableOpacity>
+        <View style={styles.iconGroup}>
+            {/* Notificações */}
+            <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("Notifications")}>
+              <Feather name="bell" size={24} color="#282727ff" />
+            </TouchableOpacity>
 
-          {/* Salvos */}
-          <TouchableOpacity onPress={() => navigation.navigate("SavedTrips")}>
-            <Feather name="bookmark" size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
+            {/* Salvos */}
+            <TouchableOpacity style={[styles.iconButton, styles.iconSpacing]} onPress={() => navigation.navigate("SavedTrips")}>
+              <Feather name="bookmark" size={24} color="#282727ff" />
+            </TouchableOpacity>
+          </View>
       </View>
 
       {/* Barra de busca */}
       <View style={styles.searchBar}>
-        <Feather name="search" size={18} color="#777" style={{ marginRight: 4 }} />
+       
         <TextInput
           placeholder="Ex: Praia, Serviços..."
           placeholderTextColor="#999"
           style={styles.input}
         />
+
+         <Feather name="search" size={18} color="#777" style={{ marginRight: 8 }} />
       </View>
     </View>
   );
@@ -45,7 +48,9 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingTop: 60,
     paddingHorizontal: 16,
-    backgroundColor: "#fff",
+    paddingBottom: 28,
+    backgroundColor: "#FF9A00",
+    borderRadius: 26
   },
   row: {
     flexDirection: "row",
@@ -54,27 +59,49 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logo: {
-    width: 45,
-    height: 45,
-    borderRadius: 22,
-    backgroundColor: "#e3e3e3",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#fef6e4",
+  },
+  titleContainer: {
+    flex: 1,
+    alignItems: "center",
   },
   title: {
     fontSize: 22,
     fontWeight: "700",
-    marginLeft: 10,
+    color: "#282727ff",
   },
   searchBar: {
-    marginTop: 14,
+    marginTop: 26,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ececec",
-    borderRadius: 30,
-    paddingHorizontal: 12,
-    height: 40,
+    backgroundColor: "#fef6e4",
+    borderRadius: 28,   // metade da altura (MD3)
+    paddingHorizontal: 16, // token MD3
+    height: 56,
+    width: "100%",      // ocupa o container
   },
+
   input: {
     flex: 1,
     fontSize: 14,
+  },
+  
+  iconButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    
+  },
+  iconSpacing: {
+    marginLeft: 0.1,
   },
 });

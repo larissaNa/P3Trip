@@ -39,18 +39,12 @@ const toggleSave = async () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={26} color="#333" />
+          <Ionicons name="chevron-back" size={24} color="#333" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>{travel.title}</Text>
 
-        <TouchableOpacity onPress={toggleSave}>
-          {isSaved ? (
-            <Ionicons name="bookmark" size={26} color="#2c83e5" />   // preenchido
-          ) : (
-            <Ionicons name="bookmark-outline" size={26} color="#333" /> // vazio
-          )}
-        </TouchableOpacity>
+        <View style={{ width: 26 }} />
 
       </View>
 
@@ -59,18 +53,37 @@ const toggleSave = async () => {
         {/* Carrossel */}
         <ScrollView
           horizontal
-          pagingEnabled
           showsHorizontalScrollIndicator={false}
           style={styles.carouselContainer}
+          contentContainerStyle={{ paddingHorizontal: 16 }}
+          snapToInterval={screenWidth - 32 + 16}
+          decelerationRate="fast"
         >
-          {travel.images?.map((img: string, index: number) => (
-            <Image
-              key={index}
-              source={{ uri: img }}
-              style={[styles.carouselImage, { width: screenWidth }]}
-            />
-          ))}
+          {travel.images?.map((img: string, index: number) => {
+            const isLast = index === (travel.images?.length ?? 0) - 1;
+            return (
+              <Image
+                key={index}
+                source={{ uri: img }}
+                style={[
+                  styles.carouselImage,
+                  { width: screenWidth - 32, marginRight: isLast ? 0 : 16 },
+                ]}
+              />
+            );
+          })}
         </ScrollView>
+
+        {/* Botão salvar abaixo da imagem */}
+        <View style={styles.saveButtonContainer}>
+          <TouchableOpacity onPress={toggleSave}>
+            {isSaved ? (
+              <Ionicons name="bookmark" size={24} color="#2c83e5" />
+            ) : (
+              <Ionicons name="bookmark-outline" size={24} color="#333" />
+            )}
+          </TouchableOpacity>
+        </View>
 
         {/* Conteúdo */}
         <View style={styles.content}>
@@ -121,7 +134,7 @@ const toggleSave = async () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#e8e8e4" },
 
   header: {
     flexDirection: "row",
@@ -129,25 +142,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingTop: 50,
     paddingHorizontal: 16,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
+    paddingBottom: 20,
+    backgroundColor: "#dce9ebff",
   },
 
   headerTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#333",
+    color: "#191919ff",
   },
 
   carouselContainer: {
     width: "100%",
-    height: 260,
+    height: 180,
+    
   },
 
   carouselImage: {
-    height: 260,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    height: 180,
+    borderRadius: 26,
   },
 
   content: {
@@ -163,19 +176,19 @@ const styles = StyleSheet.create({
   location: {
     marginLeft: 6,
     fontSize: 16,
-    color: "#555",
+    color: "#191919ff",
   },
 
   date: {
     marginLeft: 6,
     fontSize: 15,
-    color: "#555",
+    color: "#191919ff",
   },
 
   price: {
     marginTop: 12,
     fontSize: 24,
-    fontWeight: "700",
+    fontWeight: "800",
     color: "#2c83e5",
   },
 
@@ -209,7 +222,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderColor: "#eee",
-    backgroundColor: "#fff",
+    backgroundColor: "#eff0f3",
   },
 
   whatsappButton: {
@@ -218,7 +231,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 26,
+    
   },
 
   whatsappText: {
@@ -226,5 +240,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
     marginLeft: 8,
+  },
+  saveButtonContainer: {
+    paddingHorizontal: 16,
+    marginTop: 12,
+    alignItems: "flex-end",
+    
   },
 });
