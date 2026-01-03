@@ -10,7 +10,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor: "#e8e8e4" }}>
       <Navbar />
 
       {vm.loading ? (
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2c83e5",
     paddingVertical: 12,
     paddingHorizontal: 26,
-    borderRadius: 10,
+    borderRadius: 26,
   },
   buttonText: {
     color: "#fff",

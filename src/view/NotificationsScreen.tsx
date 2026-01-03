@@ -52,7 +52,7 @@ export default function NotificationsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#e8e8e4" },
 
   header: {
     flexDirection: "row",
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 16,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderColor: "#424141ff",
   },
 
   cardTitle: {
