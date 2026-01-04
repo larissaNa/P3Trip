@@ -1,6 +1,7 @@
 // viewmodel/useSavedTripsViewModel.ts
 
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Travel } from "../model/entities/Travel";
 import { TravelService } from "../model/services/TravelService";
 
@@ -17,9 +18,11 @@ export const useSavedTripsViewModel = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadSaved();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadSaved();
+    }, [])
+  );
 
   return { savedTrips, loading, reload: loadSaved };
 };

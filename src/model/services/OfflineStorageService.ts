@@ -29,11 +29,16 @@ export class OfflineStorageService {
   }
 
   async saveTripLocally(travel: Travel): Promise<void> {
-    const list = await this.getSavedTrips();
-    const exists = list.some((t) => t.id === travel.id);
-    const next = exists ? list : [{ ...travel, saved: true }, ...list];
-    await this.setSavedTrips(next);
-    await this.enqueue({ type: "save", id: travel.id });
+    try {
+      const list = await this.getSavedTrips();
+      const exists = list.some((t) => t.id === travel.id);
+      const next = exists ? list : [{ ...travel, saved: true }, ...list];
+      await this.setSavedTrips(next);
+      await this.enqueue({ type: "save", id: travel.id });
+      console.log(`OfflineStorage: Viagem ${travel.id} salva localmente.`);
+    } catch (e) {
+      console.error("OfflineStorage: Erro ao salvar viagem localmente", e);
+    }
   }
 
   async unsaveTripLocally(id: string): Promise<void> {
@@ -41,6 +46,21 @@ export class OfflineStorageService {
     const next = list.filter((t) => t.id !== id);
     await this.setSavedTrips(next);
     await this.enqueue({ type: "unsave", id });
+  }
+
+  async cacheSavedTrip(travel: Travel): Promise<void> {
+    const list = await this.getSavedTrips();
+    const exists = list.some((t) => t.id === travel.id);
+    if (!exists) {
+      const next = [{ ...travel, saved: true }, ...list];
+      await this.setSavedTrips(next);
+    }
+  }
+
+  async removeSavedTripFromCache(id: string): Promise<void> {
+    const list = await this.getSavedTrips();
+    const next = list.filter((t) => t.id !== id);
+    await this.setSavedTrips(next);
   }
 
   async getQueue(): Promise<QueueItem[]> {
