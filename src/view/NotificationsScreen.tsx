@@ -29,7 +29,7 @@ export default function NotificationsScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={26} color="#333" />
+          <Ionicons name="arrow-back-outline" size={26} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notificações</Text>
         <View style={{ width: 26 }} />
@@ -52,7 +52,7 @@ export default function NotificationsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#e8e8e4" },
+  container: { flex: 1, backgroundColor: "#edf1f5ff" },
 
   header: {
     flexDirection: "row",

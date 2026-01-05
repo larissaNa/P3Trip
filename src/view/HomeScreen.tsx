@@ -10,7 +10,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#e8e8e4" }}>
+    <View style={{ flex: 1, backgroundColor: "#edf1f5ff" }}>
       <Navbar />
 
       {vm.loading ? (
