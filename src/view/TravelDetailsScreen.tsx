@@ -74,28 +74,28 @@ const toggleSave = async () => {
           })}
         </ScrollView>
 
-        {/* Botão salvar abaixo da imagem */}
-        <View style={styles.saveButtonContainer}>
-          <TouchableOpacity onPress={toggleSave}>
-            {isSaved ? (
-              <Ionicons name="bookmark" size={32} color="#2c83e5" />
-            ) : (
-              <Ionicons name="bookmark-outline" size={32} color="#333" />
-            )}
-          </TouchableOpacity>
-        </View>
-
         {/* Conteúdo */}
         <View style={styles.content}>
+          <View style={styles.headerInfoRow}>
+            <View>
+              <View style={styles.row}>
+                <Ionicons name="location-outline" size={20} color="#2c83e5" />
+                <Text style={styles.location}>{travel.destination}</Text>
+              </View>
 
-          <View style={styles.row}>
-            <Ionicons name="location-outline" size={20} color="#2c83e5" />
-            <Text style={styles.location}>{travel.location}</Text>
-          </View>
+              <View style={styles.row}>
+                <MaterialIcons name="date-range" size={20} color="#2c83e5" />
+                <Text style={styles.date}>{travel.dateRange}</Text>
+              </View>
+            </View>
 
-          <View style={styles.row}>
-            <MaterialIcons name="date-range" size={20} color="#2c83e5" />
-            <Text style={styles.date}>{travel.dateRange}</Text>
+            <TouchableOpacity onPress={toggleSave}>
+              {isSaved ? (
+                <Ionicons name="bookmark" size={32} color="#2c83e5" />
+              ) : (
+                <Ionicons name="bookmark-outline" size={32} color="#333" />
+              )}
+            </TouchableOpacity>
           </View>
 
           <Text style={styles.price}>R$ {travel.price}</Text>
@@ -167,6 +167,13 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
+  headerInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -240,11 +247,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
     marginLeft: 8,
-  },
-  saveButtonContainer: {
-    paddingHorizontal: 16,
-    marginTop: 12,
-    alignItems: "flex-end",
-    
   },
 });

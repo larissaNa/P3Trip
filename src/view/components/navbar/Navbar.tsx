@@ -25,7 +25,7 @@ export default function Navbar() {
               pressed && styles.pressedBackground,
             ]}
           >
-            <Feather name="bell" size={32} color="#282727ff" />
+            <Feather name="bell" size={24} color="#282727ff" />
           </Pressable>
 
           {/* Salvos */}
@@ -37,7 +37,7 @@ export default function Navbar() {
               pressed && styles.pressedBackground,
             ]}
           >
-            <Feather name="bookmark" size={32} color="#282727ff" />
+            <Feather name="bookmark" size={24} color="#282727ff" />
           </Pressable>
         </View>
       </View>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     color: "#282727ff",
   },
   searchBar: {
-    marginTop: 26,
+    marginTop: 8,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fbfcffff",
@@ -137,6 +137,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconSpacing: {
-    marginLeft: 5,
+    marginLeft: 1,
   },
 });
