@@ -12,7 +12,7 @@ export default function SavedTripsScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={26} color="#333" />
+          <Ionicons name="arrow-back-outline" size={26} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Viagens Salvas</Text>
         <View style={{ width: 26 }} />
@@ -51,7 +51,7 @@ export default function SavedTripsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#e8e8e4" },
+  container: { flex: 1, backgroundColor: "#EDF1F5FF" },
 
   header: {
     flexDirection: "row",

@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -12,33 +12,50 @@ export default function Navbar() {
         {/* Logo */}
         <View style={styles.logo} />
 
-        <View style={styles.titleContainer}>
+        <View style={styles.titleContainer} pointerEvents="none">
           <Text style={styles.title}>D&E Turismo</Text>
         </View>
 
         <View style={styles.iconGroup}>
-            {/* Notificações */}
-            <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate("Notifications")}>
-              <Feather name="bell" size={24} color="#282727ff" />
-            </TouchableOpacity>
+          {/* Notificações */}
+          <Pressable
+            onPress={() => navigation.navigate("Notifications")}
+            style={({ pressed }) => [
+              styles.iconsButton,
+              pressed && styles.pressedBackground,
+            ]}
+          >
+            <Feather name="bell" size={32} color="#282727ff" />
+          </Pressable>
 
-            {/* Salvos */}
-            <TouchableOpacity style={[styles.iconButton, styles.iconSpacing]} onPress={() => navigation.navigate("SavedTrips")}>
-              <Feather name="bookmark" size={24} color="#282727ff" />
-            </TouchableOpacity>
-          </View>
+          {/* Salvos */}
+          <Pressable
+            onPress={() => navigation.navigate("SavedTrips")}
+            style={({ pressed }) => [
+              styles.iconsButton,
+              styles.iconSpacing,
+              pressed && styles.pressedBackground,
+            ]}
+          >
+            <Feather name="bookmark" size={32} color="#282727ff" />
+          </Pressable>
+        </View>
       </View>
 
       {/* Barra de busca */}
       <View style={styles.searchBar}>
-       
         <TextInput
           placeholder="Ex: Praia, Serviços..."
           placeholderTextColor="#999"
           style={styles.input}
         />
 
-         <Feather name="search" size={18} color="#777" style={{ marginRight: 8 }} />
+        <Feather
+          name="search"
+          size={18}
+          color="#777"
+          style={{ marginRight: 8 }}
+        />
       </View>
     </View>
   );
@@ -49,23 +66,37 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 16,
     paddingBottom: 28,
-    backgroundColor: "#FF9A00",
-    borderRadius: 26
+    borderBottomLeftRadius: 23,
+    borderBottomRightRadius: 23,
+    backgroundColor: "#d9dfe9ff",
+
+    //shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 10,
+    position: "relative",
   },
   logo: {
     width: 48,
     height: 48,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 24,
-    backgroundColor: "#fef6e4",
+    marginLeft: 2,
+    backgroundColor: "#fbfcffff",
   },
   titleContainer: {
-    flex: 1,
+    position: "absolute",
+    left: 0,
+    right: 0,
     alignItems: "center",
   },
   title: {
@@ -77,31 +108,35 @@ const styles = StyleSheet.create({
     marginTop: 26,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fef6e4",
-    borderRadius: 28,   // metade da altura (MD3)
-    paddingHorizontal: 16, // token MD3
+    backgroundColor: "#fbfcffff",
+    borderRadius: 28,
+    paddingHorizontal: 16,
     height: 56,
-    width: "100%",      // ocupa o container
+    width: "100%",
   },
 
   input: {
     flex: 1,
     fontSize: 14,
   },
-  
-  iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
+
+  iconsButton: {
+    width: 42,
+    height: 50,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
+
+  pressedBackground: {
+    backgroundColor: "rgba(115, 128, 184, 0.12)",
+  },
+
   iconGroup: {
     flexDirection: "row",
     alignItems: "center",
-    
   },
   iconSpacing: {
-    marginLeft: 0.1,
+    marginLeft: 5,
   },
 });

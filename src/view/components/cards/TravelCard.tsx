@@ -52,9 +52,9 @@ export default function TravelCard({
 const styles = StyleSheet.create({
   card: {
     width: "100%",
-    backgroundColor: "#cbd9e7ff",
+    backgroundColor: "#ffffffff",
     borderRadius: 12,
-    marginBottom: 26,
+    marginBottom: 24,
     overflow: "hidden",
   },
   image: {
@@ -65,9 +65,9 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 10,
   },
   location: {
     fontSize: 14,
