@@ -1,8 +1,6 @@
-import React from "react";
-const TestRenderer = require("react-test-renderer");
-const act = TestRenderer.act as any;
-
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useSavedTripsViewModel } from "../../src/viewmodel/useSavedTripsViewModel";
+import { TravelService } from "../../src/model/services/TravelService";
 
 jest.mock("@react-navigation/native", () => {
   const React = require("react");
@@ -13,109 +11,61 @@ jest.mock("@react-navigation/native", () => {
   };
 });
 
-jest.mock("../../src/model/services/TravelService", () => {
-  const listSavedTravels = jest.fn();
-  return {
-    TravelService: jest.fn().mockImplementation(() => ({
-      listSavedTravels,
-    })),
-    __mocks: {
-      listSavedTravels,
-    },
-  };
-});
-
-const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
-
-function renderHook<TResult>(hook: () => TResult) {
-  let latest: TResult | undefined;
-
-  function TestComponent() {
-    latest = hook();
-    return null;
-  }
-
-  let renderer: any;
-  act(() => {
-    renderer = TestRenderer.create(React.createElement(TestComponent));
-  });
-
-  return {
-    get result() {
-      if (latest === undefined) throw new Error("Hook result not available");
-      return latest;
-    },
-    rerender() {
-      act(() => {
-        renderer.update(React.createElement(TestComponent));
-      });
-    },
-    unmount() {
-      renderer.unmount();
-    },
-  };
-}
+// Mock do Service
+jest.mock("../../src/model/services/TravelService");
 
 describe("useSavedTripsViewModel", () => {
-  const travelServiceModule = require("../../src/model/services/TravelService") as any;
-  const listSavedTravelsMock = travelServiceModule.__mocks.listSavedTravels as jest.Mock;
+  const mockListSavedTravels = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (TravelService as jest.Mock).mockImplementation(() => ({
+      listSavedTravels: mockListSavedTravels,
+    }));
   });
 
   it("carrega viagens salvas no foco com sucesso", async () => {
     const mockSaved = [{ id: "1", title: "Saved", saved: true }];
-    listSavedTravelsMock.mockResolvedValueOnce(mockSaved);
+    mockListSavedTravels.mockResolvedValueOnce(mockSaved);
 
-    const hook = renderHook(useSavedTripsViewModel);
+    const { result } = renderHook(() => useSavedTripsViewModel());
 
-    expect(hook.result.loading).toBe(true);
-    expect(hook.result.savedTrips).toEqual([]);
+    expect(result.current.loading).toBe(true);
+    expect(result.current.savedTrips).toEqual([]);
 
-    await act(async () => {
-      await flushPromises();
-    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(listSavedTravelsMock).toHaveBeenCalledTimes(1);
-    expect(hook.result.loading).toBe(false);
-    expect(hook.result.savedTrips).toEqual(mockSaved);
+    expect(mockListSavedTravels).toHaveBeenCalledTimes(1);
+    expect(result.current.savedTrips).toEqual(mockSaved);
   });
 
   it("recarrega viagens salvas via reload", async () => {
     const first = [{ id: "1", title: "Saved 1", saved: true }];
     const second = [{ id: "2", title: "Saved 2", saved: true }];
-    listSavedTravelsMock.mockResolvedValueOnce(first).mockResolvedValueOnce(second);
+    mockListSavedTravels.mockResolvedValueOnce(first).mockResolvedValueOnce(second);
 
-    const hook = renderHook(useSavedTripsViewModel);
+    const { result } = renderHook(() => useSavedTripsViewModel());
 
-    await act(async () => {
-      await flushPromises();
-    });
-
-    expect(hook.result.savedTrips).toEqual(first);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.savedTrips).toEqual(first);
 
     await act(async () => {
-      await hook.result.reload();
-      await flushPromises();
+      await result.current.reload();
     });
 
-    expect(listSavedTravelsMock).toHaveBeenCalledTimes(2);
-    expect(hook.result.loading).toBe(false);
-    expect(hook.result.savedTrips).toEqual(second);
+    expect(mockListSavedTravels).toHaveBeenCalledTimes(2);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.savedTrips).toEqual(second);
   });
 
   it("finaliza loading e mantém lista vazia quando dá erro", async () => {
-    listSavedTravelsMock.mockRejectedValueOnce(new Error("Network error"));
+    mockListSavedTravels.mockRejectedValueOnce(new Error("Network error"));
 
-    const hook = renderHook(useSavedTripsViewModel);
+    const { result } = renderHook(() => useSavedTripsViewModel());
 
-    await act(async () => {
-      await flushPromises();
-    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(listSavedTravelsMock).toHaveBeenCalledTimes(1);
-    expect(hook.result.loading).toBe(false);
-    expect(hook.result.savedTrips).toEqual([]);
+    expect(mockListSavedTravels).toHaveBeenCalledTimes(1);
+    expect(result.current.savedTrips).toEqual([]);
   });
 });
