@@ -6,6 +6,7 @@ export interface Travel {
   price: number;
   images: string[];
   saved: boolean;
-  dateRange: string;   
-  days: number;        
+  dateRange: string;
+  days: number;
+  inclui?: string[];
 }

@@ -1,9 +1,16 @@
-import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
-import { Linking, Dimensions } from "react-native";
-import { useState } from "react";
-import { TravelService } from "../model/services/TravelService";
+
+import { useTravelDetailsViewModel } from "../viewmodel/useTravelDetailsViewModel";
 
 export default function TravelDetailsScreen() {
   const route = useRoute<any>();
@@ -11,32 +18,12 @@ export default function TravelDetailsScreen() {
   const { travel } = route.params;
 
   const screenWidth = Dimensions.get("window").width;
-  const [isSaved, setIsSaved] = useState(travel.saved);
-const service = new TravelService();
 
-const toggleSave = async () => {
-  const newStatus = !isSaved;
-
-  // muda o ícone imediatamente
-  setIsSaved(newStatus);
-
-  // salva no supabase
-  await service.updateSavedStatus(travel.id, newStatus);
-};
-
-
-  const openWhatsApp = () => {
-    const phone = "5586998527609";
-    const message = `Olá! Quero reservar o pacote: ${travel.title}`;
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    Linking.openURL(url);
-  };
-
+  const { isSaved, toggleSave, openWhatsApp } =
+    useTravelDetailsViewModel(travel);
 
   return (
     <View style={styles.container}>
-
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back-outline" size={24} color="#333" />
@@ -45,12 +32,9 @@ const toggleSave = async () => {
         <Text style={styles.headerTitle}>{travel.title}</Text>
 
         <View style={{ width: 26 }} />
-
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-
-        {/* Carrossel */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -60,14 +44,18 @@ const toggleSave = async () => {
           decelerationRate="fast"
         >
           {travel.images?.map((img: string, index: number) => {
-            const isLast = index === (travel.images?.length ?? 0) - 1;
+            const isLast = index === travel.images.length - 1;
+
             return (
               <Image
                 key={index}
                 source={{ uri: img }}
                 style={[
                   styles.carouselImage,
-                  { width: screenWidth - 32, marginRight: isLast ? 0 : 16 },
+                  {
+                    width: screenWidth - 32,
+                    marginRight: isLast ? 0 : 16,
+                  },
                 ]}
               />
             );
@@ -79,12 +67,20 @@ const toggleSave = async () => {
           <View style={styles.headerInfoRow}>
             <View>
               <View style={styles.row}>
-                <Ionicons name="location-outline" size={20} color="#2c83e5" />
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color="#2c83e5"
+                />
                 <Text style={styles.location}>{travel.destination}</Text>
               </View>
 
               <View style={styles.row}>
-                <MaterialIcons name="date-range" size={20} color="#2c83e5" />
+                <MaterialIcons
+                  name="date-range"
+                  size={20}
+                  color="#2c83e5"
+                />
                 <Text style={styles.date}>{travel.dateRange}</Text>
               </View>
             </View>
@@ -93,7 +89,11 @@ const toggleSave = async () => {
               {isSaved ? (
                 <Ionicons name="bookmark" size={32} color="#2c83e5" />
               ) : (
-                <Ionicons name="bookmark-outline" size={32} color="#333" />
+                <Ionicons
+                  name="bookmark-outline"
+                  size={32}
+                  color="#333"
+                />
               )}
             </TouchableOpacity>
           </View>
@@ -107,24 +107,30 @@ const toggleSave = async () => {
 
           <Text style={styles.sectionTitle}>Inclui</Text>
 
-          {[
-            "Hospedagem completa",
-            "Acompanhamento de guia",
-            "Atividades exclusivas",
-            "Seguro viagem",
-          ].map((item, index) => (
-            <View key={index} style={styles.highlightRow}>
-              <Feather name="check-circle" size={18} color="#2c83e5" />
-              <Text style={styles.highlightText}>{item}</Text>
-            </View>
-          ))}
-
+          {/* Renderiza apenas se houver itens cadastrados */}
+          {(travel.inclui && travel.inclui.length > 0) ? (
+            travel.inclui.map((item: string, index: number) => (
+              <View key={index} style={styles.highlightRow}>
+                <Feather
+                  name="check-circle"
+                  size={18}
+                  color="#2c83e5"
+                />
+                <Text style={styles.highlightText}>{item}</Text>
+              </View>
+            ))
+          ) : (
+            // Opcional: Caso não tenha nada cadastrado, exibe uma mensagem ou itens padrão
+            <Text style={styles.description}>Consulte os itens inclusos.</Text>
+          )}
         </View>
       </ScrollView>
 
-      {/* Botão WhatsApp */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.whatsappButton} onPress={openWhatsApp}>
+        <TouchableOpacity
+          style={styles.whatsappButton}
+          onPress={openWhatsApp}
+        >
           <Feather name="message-circle" size={20} color="#fff" />
           <Text style={styles.whatsappText}>Entrar em contato</Text>
         </TouchableOpacity>

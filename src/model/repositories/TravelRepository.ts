@@ -22,9 +22,9 @@ export class TravelRepository {
     saved: item.salvo ?? false,
     dateRange: item.data_range,
     days: item.dias,
+    inclui: item.inclui ?? [], 
   }));
 }
-
 
   async getSavedTravels(): Promise<Travel[]> {
     const { data, error } = await supabase
