@@ -66,16 +66,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 16,
     paddingBottom: 28,
-    borderBottomLeftRadius: 23,
-    borderBottomRightRadius: 23,
-    backgroundColor: "#d9dfe9ff",
-
-    //shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    backgroundColor: "#a7c9ffff",
   },
   row: {
     flexDirection: "row",
