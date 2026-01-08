@@ -65,7 +65,8 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: "Nunito-Bold",
+    color: "#191919ff",
   },
 
   card: {
@@ -77,17 +78,19 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: "Nunito-SemiBold",
     color: "#333",
   },
 
   cardMsg: {
     marginTop: 4,
+    fontFamily: "Nunito-Regular",
     color: "#555",
   },
 
   cardTime: {
     marginTop: 4,
+    fontFamily: "Nunito-Regular",
     color: "#999",
     fontSize: 12,
   },

@@ -148,14 +148,13 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Nunito-ExtraBold",
     color: "#191919ff",
   },
 
   carouselContainer: {
     width: "100%",
     height: 180,
-    
   },
 
   carouselImage: {
@@ -173,7 +172,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: 8,
   },
-  
+
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -183,32 +182,35 @@ const styles = StyleSheet.create({
   location: {
     marginLeft: 6,
     fontSize: 16,
+    fontFamily: "Nunito-Medium",
     color: "#191919ff",
   },
 
   date: {
     marginLeft: 6,
     fontSize: 15,
+    fontFamily: "Nunito-Regular",
     color: "#191919ff",
   },
 
   price: {
     marginTop: 12,
     fontSize: 24,
-    fontWeight: "800",
+    fontFamily: "Nunito-ExtraBold",
     color: "#2c83e5",
   },
 
   sectionTitle: {
     marginTop: 22,
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Nunito-Bold",
     color: "#333",
     marginBottom: 8,
   },
 
   description: {
     fontSize: 15,
+    fontFamily: "Nunito-Regular",
     color: "#666",
     lineHeight: 22,
   },
@@ -222,6 +224,7 @@ const styles = StyleSheet.create({
 
   highlightText: {
     fontSize: 15,
+    fontFamily: "Nunito-Regular",
     color: "#444",
   },
 
@@ -239,12 +242,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 16,
     borderRadius: 26,
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   whatsappText: {
     color: "#fff",
-    fontWeight: "600",
+    fontFamily: "Nunito-SemiBold",
     fontSize: 16,
     marginLeft: 8,
   },

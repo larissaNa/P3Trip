@@ -53,20 +53,22 @@ export const NetworkBanner = () => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    width: '100%',
+    width: "100%",
     zIndex: 9999, // Ensure it's on top
-    position: 'absolute',
+    position: "absolute",
     top: 0,
   },
+
   container: {
     padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
+
   text: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
     fontSize: 14,
-  }
+    fontFamily: "Nunito-Bold",
+  },
 });

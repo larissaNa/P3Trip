@@ -70,13 +70,14 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 23,
     backgroundColor: "#d9dfe9ff",
 
-    //shadow
+    // shadow
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
     gap: 10,
     position: "relative",
   },
+
   logo: {
     width: 48,
     height: 48,
@@ -93,17 +95,20 @@ const styles = StyleSheet.create({
     marginLeft: 2,
     backgroundColor: "#fbfcffff",
   },
+
   titleContainer: {
     position: "absolute",
     left: 0,
     right: 0,
     alignItems: "center",
   },
+
   title: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 23,
+    fontFamily: "Nunito-ExtraBold",
     color: "#282727ff",
   },
+
   searchBar: {
     marginTop: 8,
     flexDirection: "row",
@@ -118,6 +123,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
+    fontFamily: "Nunito-Regular",
+    color: "#333",
   },
 
   iconsButton: {
@@ -136,6 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+
   iconSpacing: {
     marginLeft: 1,
   },
