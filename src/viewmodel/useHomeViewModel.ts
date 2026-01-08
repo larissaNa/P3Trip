@@ -10,9 +10,14 @@ export const HomeViewModel = () => {
 
   const loadTravels = async () => {
     setLoading(true);
-    const travels = await service.listAllTravels();
-    setTravelData(travels);
-    setLoading(false);
+    try {
+      const travels = await service.listAllTravels();
+      setTravelData(travels);
+    } catch {
+      setTravelData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
