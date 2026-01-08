@@ -13,9 +13,14 @@ export const useSavedTripsViewModel = () => {
 
   const loadSaved = async () => {
     setLoading(true);
-    const data = await service.listSavedTravels();
-    setSavedTrips(data);
-    setLoading(false);
+    try {
+      const data = await service.listSavedTravels();
+      setSavedTrips(data);
+    } catch {
+      setSavedTrips([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useFocusEffect(
