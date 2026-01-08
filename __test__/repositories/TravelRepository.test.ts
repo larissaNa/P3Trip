@@ -26,6 +26,7 @@ describe('TravelRepository', () => {
           salvo: false,
           data_range: '10-20 Jan',
           dias: 10,
+          inclui: ['Aéreo', 'Hotel'],
         },
       ];
 
@@ -38,6 +39,7 @@ describe('TravelRepository', () => {
       expect(mockSelect).toHaveBeenCalledWith('*');
       expect(result).toHaveLength(1);
       expect(result[0].title).toBe('Paris');
+      expect(result[0].inclui).toEqual(['Aéreo', 'Hotel']);
     });
 
     it('should return empty array on error', async () => {
