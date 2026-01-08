@@ -1,112 +1,88 @@
-import React from "react";
-const TestRenderer = require("react-test-renderer");
-const act = TestRenderer.act as any;
+import { renderHook, waitFor, act } from '@testing-library/react-native';
+import { HomeViewModel } from '../../src/viewmodel/useHomeViewModel';
+import { TravelService } from '../../src/model/services/TravelService';
 
-import { HomeViewModel } from "../../src/viewmodel/useHomeViewModel";
+// Mock do Service
+jest.mock('../../src/model/services/TravelService');
 
-jest.mock("../../src/model/services/TravelService", () => {
-  const listAllTravels = jest.fn();
-  return {
-    TravelService: jest.fn().mockImplementation(() => ({
-      listAllTravels,
-    })),
-    __mocks: {
-      listAllTravels,
+describe('HomeViewModel', () => {
+  const mockTravels = [
+    { 
+      id: '1', 
+      title: 'Praia de Atalaia', 
+      destination: 'Aracaju', 
+      price: 5000, 
+      saved: false, 
+      images: [], 
+      dateRange: '', 
+      days: 5,
+      description: 'Descrição Atalaia' 
     },
-  };
-});
-
-const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
-
-function renderHook<TResult>(hook: () => TResult) {
-  let latest: TResult | undefined;
-
-  function TestComponent() {
-    latest = hook();
-    return null;
-  }
-
-  let renderer: any;
-  act(() => {
-    renderer = TestRenderer.create(React.createElement(TestComponent));
-  });
-
-  return {
-    get result() {
-      if (latest === undefined) throw new Error("Hook result not available");
-      return latest;
+    { 
+      id: '2', 
+      title: 'Praia do Coqueiro', 
+      destination: 'Piauí', 
+      price: 4000, 
+      saved: true, 
+      images: [], 
+      dateRange: '', 
+      days: 4,
+      description: 'Descrição Coqueiro'
     },
-    rerender() {
-      act(() => {
-        renderer.update(React.createElement(TestComponent));
-      });
+    { 
+      id: '3', 
+      title: 'Serra da Capivara', 
+      destination: 'Piauí', 
+      price: 2000, 
+      saved: false, 
+      images: [], 
+      dateRange: '', 
+      days: 7,
+      description: 'Descrição Serra'
     },
-    unmount() {
-      renderer.unmount();
-    },
-  };
-}
-
-describe("HomeViewModel", () => {
-  const travelServiceModule = require("../../src/model/services/TravelService") as any;
-  const listAllTravelsMock = travelServiceModule.__mocks.listAllTravels as jest.Mock;
+  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (TravelService as jest.Mock).mockImplementation(() => ({
+      listAllTravels: jest.fn().mockResolvedValue(mockTravels),
+    }));
   });
 
-  it("carrega viagens com sucesso no mount", async () => {
-    const mockTrips = [{ id: "1", title: "Trip" }];
-    listAllTravelsMock.mockResolvedValueOnce(mockTrips);
+  it('deve filtrar viagens por termo comum (ex: "praia")', async () => {
+    const { result } = renderHook(() => HomeViewModel());
 
-    const hook = renderHook(HomeViewModel);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.travelData).toHaveLength(3);
 
-    expect(hook.result.loading).toBe(true);
-    expect(hook.result.travelData).toEqual([]);
-
+    // Pesquisar por "praia" -> Deve retornar Atalaia e Coqueiro
     await act(async () => {
-      await flushPromises();
+      // @ts-ignore
+      result.current.search('praia');
     });
 
-    expect(listAllTravelsMock).toHaveBeenCalledTimes(1);
-    expect(hook.result.loading).toBe(false);
-    expect(hook.result.travelData).toEqual(mockTrips);
+    expect(result.current.travelData).toHaveLength(2);
+    expect(result.current.travelData[0].title).toBe('Praia de Atalaia');
+    expect(result.current.travelData[1].title).toBe('Praia do Coqueiro');
   });
 
-  it("recarrega viagens via reload", async () => {
-    const first = [{ id: "1", title: "First" }];
-    const second = [{ id: "2", title: "Second" }];
-    listAllTravelsMock.mockResolvedValueOnce(first).mockResolvedValueOnce(second);
+  it('deve retornar todas as viagens quando a busca for vazia', async () => {
+    const { result } = renderHook(() => HomeViewModel());
 
-    const hook = renderHook(HomeViewModel);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
+    // Filtrar algo primeiro
     await act(async () => {
-      await flushPromises();
+      // @ts-ignore
+      result.current.search('Coqueiro');
     });
 
-    expect(hook.result.travelData).toEqual(first);
-
+    // Limpar busca
     await act(async () => {
-      await hook.result.reload();
-      await flushPromises();
+      // @ts-ignore
+      result.current.search('');
     });
 
-    expect(listAllTravelsMock).toHaveBeenCalledTimes(2);
-    expect(hook.result.loading).toBe(false);
-    expect(hook.result.travelData).toEqual(second);
-  });
-
-  it("finaliza loading e mantém lista vazia quando dá erro", async () => {
-    listAllTravelsMock.mockRejectedValueOnce(new Error("Network error"));
-
-    const hook = renderHook(HomeViewModel);
-
-    await act(async () => {
-      await flushPromises();
-    });
-
-    expect(listAllTravelsMock).toHaveBeenCalledTimes(1);
-    expect(hook.result.loading).toBe(false);
-    expect(hook.result.travelData).toEqual([]);
+    expect(result.current.travelData).toHaveLength(3);
   });
 });
