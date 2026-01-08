@@ -20,6 +20,8 @@
     "base-64": "^1.0.0",
     "expo": "~54.0.25",
     "expo-file-system": "^19.0.19",
+    "expo-font": "~14.0.10",
+    "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.8",
     "mobx": "^6.15.0",
     "mobx-react-lite": "^4.1.1",

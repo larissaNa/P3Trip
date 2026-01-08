@@ -66,11 +66,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "Nunito-Bold",
     marginBottom: 10,
+    color: "#111",
   },
   location: {
     fontSize: 14,
+    fontFamily: "Nunito-Regular",
     color: "#666",
     marginBottom: 6,
   },
@@ -81,15 +83,17 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 14,
+    fontFamily: "Nunito-Regular",
     color: "#666",
   },
   days: {
     fontSize: 14,
+    fontFamily: "Nunito-Regular",
     color: "#666",
   },
   price: {
     fontSize: 18,
-    fontWeight: "800",
+    fontFamily: "Nunito-SemiBold",
     color: "#2c83e5",
     marginTop: 4,
   },
