@@ -11,21 +11,42 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const [navbarHeight, setNavbarHeight] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const onNavbarLayout = (event: LayoutChangeEvent) => {
     setNavbarHeight(event.nativeEvent.layout.height);
   };
 
+  const handleScrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  // Interpolate scrollY to determine visibility or opacity if needed, 
+  // but simpler to use state for conditional rendering or pointer events
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      useNativeDriver: false, // Changed to false to support listener
+      listener: (event: any) => {
+        const offsetY = event.nativeEvent.contentOffset.y;
+        if (offsetY > 300 && !showScrollTop) {
+          setShowScrollTop(true);
+        } else if (offsetY <= 300 && showScrollTop) {
+          setShowScrollTop(false);
+        }
+      },
+    }
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: "#a7c9ffff" }}>
       <Animated.ScrollView 
+        ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
+        onScroll={onScroll}
       >
         {/* Navbar animada para ficar fixa no topo */}
         <Animated.View 
@@ -81,6 +102,17 @@ export default function HomeScreen() {
           )}
         </View>
       </Animated.ScrollView>
+
+      {/* Botão Flutuante (FAB) */}
+      {showScrollTop && (
+        <TouchableOpacity 
+          style={styles.fab} 
+          onPress={handleScrollToTop}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-up" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -116,4 +148,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  
+  fab: {
+    position: 'absolute',
+    bottom: 42,
+    right: 42,
+    backgroundColor: '#2c83e5', // Primary Blue for better contrast
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, // Increased opacity for better visibility against light bg
+    shadowRadius: 8,
+  }
 });
