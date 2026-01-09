@@ -22,12 +22,10 @@ export default function HomeScreen() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  // Interpolate scrollY to determine visibility or opacity if needed, 
-  // but simpler to use state for conditional rendering or pointer events
   const onScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     {
-      useNativeDriver: false, // Changed to false to support listener
+      useNativeDriver: false, 
       listener: (event: any) => {
         const offsetY = event.nativeEvent.contentOffset.y;
         if (offsetY > 300 && !showScrollTop) {
@@ -65,7 +63,7 @@ export default function HomeScreen() {
           marginTop: navbarHeight,
           backgroundColor: "#edf1f5ff", 
           minHeight: Dimensions.get("window").height,
-          paddingBottom: 100, // Aumentado padding para garantir espaço no final
+          paddingBottom: 30, 
           zIndex: 1,
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
