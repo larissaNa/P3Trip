@@ -11,21 +11,40 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const [navbarHeight, setNavbarHeight] = useState(0);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const onNavbarLayout = (event: LayoutChangeEvent) => {
     setNavbarHeight(event.nativeEvent.layout.height);
   };
 
+  const handleScrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    {
+      useNativeDriver: false, 
+      listener: (event: any) => {
+        const offsetY = event.nativeEvent.contentOffset.y;
+        if (offsetY > 300 && !showScrollTop) {
+          setShowScrollTop(true);
+        } else if (offsetY <= 300 && showScrollTop) {
+          setShowScrollTop(false);
+        }
+      },
+    }
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: "#a7c9ffff" }}>
       <Animated.ScrollView 
+        ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
+        onScroll={onScroll}
       >
         {/* Navbar animada para ficar fixa no topo */}
         <Animated.View 
@@ -44,7 +63,7 @@ export default function HomeScreen() {
           marginTop: navbarHeight,
           backgroundColor: "#edf1f5ff", 
           minHeight: Dimensions.get("window").height,
-          paddingBottom: 100, // Aumentado padding para garantir espaço no final
+          paddingBottom: 30, 
           zIndex: 1,
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
@@ -81,6 +100,17 @@ export default function HomeScreen() {
           )}
         </View>
       </Animated.ScrollView>
+
+      {/* Botão Flutuante (FAB) */}
+      {showScrollTop && (
+        <TouchableOpacity 
+          style={styles.fab} 
+          onPress={handleScrollToTop}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-up" size={24} color="#2052b1ff" />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -116,4 +146,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  
+  fab: {
+    position: 'absolute',
+    bottom: 82,
+    right: 30,
+    backgroundColor: '#a7c9ffff',
+    width: 70,
+    height: 70,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  }
 });
