@@ -110,7 +110,7 @@ export default function HomeScreen() {
           onPress={handleScrollToTop}
           activeOpacity={0.7}
         >
-          <Ionicons name="arrow-up" size={24} color="#fff" />
+          <Ionicons name="arrow-up" size={24} color="#2052b1ff" />
         </TouchableOpacity>
       )}
     </View>
@@ -151,19 +151,19 @@ const styles = StyleSheet.create({
   
   fab: {
     position: 'absolute',
-    bottom: 42,
-    right: 42,
-    backgroundColor: '#2c83e5', // Primary Blue for better contrast
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    bottom: 82,
+    right: 30,
+    backgroundColor: '#a7c9ffff',
+    width: 70,
+    height: 70,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
     elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25, // Increased opacity for better visibility against light bg
+    shadowOpacity: 0.25,
     shadowRadius: 8,
   }
 });
