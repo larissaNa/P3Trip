@@ -6,7 +6,6 @@ export const HomeViewModel = () => {
   const service = new TravelService();
 
   const [rawTravels, setRawTravels] = useState<Travel[]>([]);
-  const [filteredTravels, setFilteredTravels] = useState<Travel[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -22,19 +21,15 @@ export const HomeViewModel = () => {
     }
   };
 
-  // Fase Green: Lógica de filtro funcionando com useEffect 
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredTravels(rawTravels);
-    } else {
-      const lower = searchQuery.toLowerCase();
-      const filtered = rawTravels.filter(
-        (t) =>
-          t.title.toLowerCase().includes(lower) ||
-          t.destination.toLowerCase().includes(lower)
-      );
-      setFilteredTravels(filtered);
-    }
+  const filteredTravels = useMemo(() => {
+    if (!searchQuery.trim()) return rawTravels;
+    
+    const lower = searchQuery.toLowerCase();
+    return rawTravels.filter(
+      (t) =>
+        t.title.toLowerCase().includes(lower) ||
+        t.destination.toLowerCase().includes(lower)
+    );
   }, [rawTravels, searchQuery]);
 
   const search = (query: string) => {
