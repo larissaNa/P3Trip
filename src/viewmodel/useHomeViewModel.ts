@@ -22,7 +22,7 @@ export const HomeViewModel = () => {
     }
   };
 
-  // Fase Green: Lógica de filtro funcionando com useEffect (antes da otimização com useMemo)
+  // Fase Green: Lógica de filtro funcionando com useEffect 
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredTravels(rawTravels);
