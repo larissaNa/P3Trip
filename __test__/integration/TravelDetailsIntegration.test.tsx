@@ -50,7 +50,6 @@ describe('TravelDetailsScreen Integration Flow', () => {
     mockUpdate.mockReturnValue({ eq: mockEq });
 
     const { getByText } = render(<TravelDetailsScreen />);
-
     const saveButton = getByText(/Icon: bookmark/); 
 
     fireEvent.press(saveButton);

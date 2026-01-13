@@ -40,10 +40,6 @@ describe('HomeScreen Integration Test', () => {
 
     render(<HomeScreen />);
 
-
-    // Título da viagem deve aparecer na tela
-    // Isso confirma: ViewModel chamou Service -> Service chamou Repository -> Repository chamou Supabase
-    // -> Dados voltaram -> ViewModel atualizou estado -> View renderizou
     await waitFor(() => {
       expect(screen.getByText('Viagem para Paris')).toBeTruthy();
       expect(screen.getByText(/Paris, França/)).toBeTruthy();

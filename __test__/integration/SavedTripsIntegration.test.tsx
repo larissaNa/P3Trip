@@ -38,7 +38,6 @@ describe('SavedTripsScreen Integration Test', () => {
     });
     // O mockEq precisa ser o retorno de .select('*')
     mockSelect.mockReturnValue({ eq: mockEq });
-
     const navigationMock = { navigate: jest.fn(), goBack: jest.fn() };
     
     render(<SavedTripsScreen navigation={navigationMock} />);
@@ -62,7 +61,6 @@ describe('SavedTripsScreen Integration Test', () => {
       select: mockSelect,
     });
     mockSelect.mockReturnValue({ eq: mockEq });
-
     const navigationMock = { navigate: jest.fn(), goBack: jest.fn() };
 
     render(<SavedTripsScreen navigation={navigationMock} />);
