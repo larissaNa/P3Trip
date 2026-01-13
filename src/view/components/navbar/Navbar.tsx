@@ -14,14 +14,16 @@ export default function Navbar({ onSearch }: NavbarProps) {
       {/* Linha superior */}
       <View style={styles.row}>
         {/* Logo */}
-        <Image source={require("../../../../assets/logo.jpg")} style={styles.logo} />
+        <Image
+          source={require("../../../../assets/logo.jpg")}
+          style={styles.logo}
+        />
 
         <View style={styles.titleContainer} pointerEvents="none">
           <Text style={styles.title}>D&E Turismo</Text>
         </View>
 
         <View style={styles.iconGroup}>
-          {/* Notificações */}
           <Pressable
             onPress={() => navigation.navigate("Notifications")}
             style={({ pressed }) => [
@@ -32,7 +34,6 @@ export default function Navbar({ onSearch }: NavbarProps) {
             <Feather name="bell" size={24} color="#282727ff" />
           </Pressable>
 
-          {/* Salvos */}
           <Pressable
             onPress={() => navigation.navigate("SavedTrips")}
             style={({ pressed }) => [
@@ -73,6 +74,7 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     backgroundColor: "#a7c9ffff",
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -80,26 +82,28 @@ const styles = StyleSheet.create({
     gap: 10,
     position: "relative",
   },
+
   logo: {
     width: 48,
     height: 48,
-    alignItems: "center",
-    justifyContent: "center",
     borderRadius: 24,
     marginLeft: 2,
     backgroundColor: "#fbfcffff",
   },
+
   titleContainer: {
     position: "absolute",
     left: 0,
     right: 0,
     alignItems: "center",
   },
+
   title: {
     fontSize: 22,
-    fontWeight: "700",
+    fontFamily: "Nunito-ExtraBold",
     color: "#282727ff",
   },
+
   searchBar: {
     marginTop: 8,
     flexDirection: "row",
@@ -114,6 +118,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 14,
+    fontFamily: "Nunito-Regular",
   },
 
   iconsButton: {
@@ -132,6 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+
   iconSpacing: {
     marginLeft: 1,
   },
