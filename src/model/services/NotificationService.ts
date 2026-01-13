@@ -8,6 +8,18 @@ export class NotificationService {
       return null;
     }
 
+    const hasPermission = await this.ensurePermissions();
+    if (!hasPermission) {
+      return null;
+    }
+
+    const token = await this.getPushToken();
+    await this.setupAndroidChannel();
+
+    return token;
+  }
+
+  private async ensurePermissions(): Promise<boolean> {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
@@ -16,21 +28,21 @@ export class NotificationService {
       finalStatus = status;
     }
 
-    if (finalStatus !== 'granted') {
-      return null;
-    }
+    return finalStatus === 'granted';
+  }
 
+  private async getPushToken(): Promise<string> {
     const tokenData = await Notifications.getExpoPushTokenAsync();
-    const token = tokenData.data;
+    return tokenData.data;
+  }
 
+  private async setupAndroidChannel(): Promise<void> {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
         name: 'default',
         importance: Notifications.AndroidImportance.MAX,
       });
     }
-
-    return token;
   }
 
   setupNotificationListeners(
