@@ -2,7 +2,11 @@ import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export default function Navbar() {
+interface NavbarProps {
+  onSearch?: (text: string) => void;
+}
+
+export default function Navbar({ onSearch }: NavbarProps) {
   const navigation = useNavigation<any>();
 
   return (
@@ -48,6 +52,7 @@ export default function Navbar() {
           placeholder="Ex: Praia, Serviços..."
           placeholderTextColor="#999"
           style={styles.input}
+          onChangeText={onSearch}
         />
 
         <Feather

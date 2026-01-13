@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Travel } from "../model/entities/Travel";
 import { TravelService } from "../model/services/TravelService";
 
@@ -41,7 +41,7 @@ export const HomeViewModel = () => {
   }, []);
 
   return {
-    travelData,
+    travelData: filteredTravels,
     loading,
     reload: loadTravels,
     search,

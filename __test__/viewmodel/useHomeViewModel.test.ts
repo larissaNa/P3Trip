@@ -73,13 +73,11 @@ describe('HomeViewModel', () => {
 
     // Filtrar algo primeiro
     await act(async () => {
-      // @ts-ignore
       result.current.search('Coqueiro');
     });
 
     // Limpar busca
     await act(async () => {
-      // @ts-ignore
       result.current.search('');
     });
 

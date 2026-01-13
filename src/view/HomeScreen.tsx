@@ -55,7 +55,7 @@ export default function HomeScreen() {
           }}
           onLayout={onNavbarLayout}
         >
-          <Navbar />
+          <Navbar onSearch={vm.search} />
         </Animated.View>
 
         {/* Conteúdo com marginTop para iniciar abaixo da Navbar */}
