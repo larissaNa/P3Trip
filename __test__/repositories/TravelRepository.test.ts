@@ -50,7 +50,7 @@ describe('TravelRepository', () => {
           descricao: 'Capital',
           destino: 'Portugal',
           preco: 800,
-          salvo: true,
+          // salvo ausente
           data_range: '01-05 Mar',
           dias: 5
           // imagens e inclui ausentes
@@ -64,6 +64,23 @@ describe('TravelRepository', () => {
 
       expect(result[0].images).toEqual([]);
       expect(result[0].inclui).toEqual([]);
+      expect(result[0].saved).toBe(false);
+    });
+
+    it('should log error when NODE_ENV is not test', async () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const mockSelect = jest.fn().mockResolvedValue({ data: null, error: { message: 'Error' } });
+      mockFrom.mockReturnValue({ select: mockSelect });
+
+      await repository.getAllTravels();
+
+      expect(consoleSpy).toHaveBeenCalledWith('Erro ao buscar viagens:', { message: 'Error' });
+
+      process.env.NODE_ENV = originalEnv;
+      consoleSpy.mockRestore();
     });
 
     it('should return empty array on error', async () => {

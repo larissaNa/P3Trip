@@ -28,6 +28,19 @@ describe('StorageService', () => {
       expect(mockCreateSignedUrl).toHaveBeenCalledTimes(2);
       expect(urls).toEqual(['url1', 'url2']);
     });
+
+    it('should skip urls if signing fails or returns no url', async () => {
+      const paths = ['path1', 'path2'];
+      const mockCreateSignedUrl = jest.fn()
+        .mockResolvedValueOnce({ data: null, error: { message: 'Error' } })
+        .mockResolvedValueOnce({ data: { signedUrl: null }, error: null });
+
+      mockStorageFrom.mockReturnValue({ createSignedUrl: mockCreateSignedUrl });
+
+      const urls = await service.getImageUrls(paths);
+
+      expect(urls).toEqual([]);
+    });
   });
 
   describe('uploadImage', () => {

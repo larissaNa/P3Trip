@@ -73,4 +73,18 @@ describe('useTravelDetailsViewModel', () => {
     expect(spyOpen).toHaveBeenCalledWith(expect.stringContaining('https://wa.me/'));
     expect(spyOpen).toHaveBeenCalledWith(expect.stringContaining(encodeURIComponent('Atalaia Praia Boa')));
   });
+
+  it('deve tratar erro ao abrir WhatsApp (catch)', () => {
+    const travel = { title: 'Atalaia Praia Boa' };
+    const spyOpen = jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('Cant open'));
+    
+    const { result } = renderHook(() => useTravelDetailsViewModel(travel));
+    
+    act(() => {
+        result.current.openWhatsApp();
+    });
+    
+    // Just verify it doesn't crash
+    expect(spyOpen).toHaveBeenCalled();
+  });
 });

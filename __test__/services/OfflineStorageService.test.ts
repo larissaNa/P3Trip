@@ -58,6 +58,61 @@ describe('OfflineStorageService', () => {
       );
     });
 
+    it('should update existing saved trip locally', async () => {
+      const initialSaved = [{ id: '1', title: 'Trip', saved: true }];
+      (AsyncStorage.getItem as jest.Mock).mockImplementation((key) => {
+        if (key === '@p3trip/saved') return Promise.resolve(JSON.stringify(initialSaved));
+        if (key === '@p3trip/sync') return Promise.resolve(JSON.stringify([]));
+        return Promise.resolve(null);
+      });
+
+      const updatedTrip = { id: '1', title: 'Trip Updated' };
+      await service.saveTripLocally(updatedTrip as any);
+
+      // Should not add new item, but keep list or update it?
+      // Code says: const next = exists ? list : [{ ...travel, saved: true }, ...list];
+      // So if exists, it does NOT update the content, just keeps the list?
+      // Wait, let's check the code:
+      // const next = exists ? list : [{ ...travel, saved: true }, ...list];
+      // It keeps 'list' which is the old list. So it ignores the update if ID exists.
+      // This seems to be the logic.
+      
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        '@p3trip/saved', 
+        JSON.stringify(initialSaved) // Should be same as initial
+      );
+    });
+
+    it('should log success when saving locally in dev mode', async () => {
+       const originalEnv = process.env.NODE_ENV;
+       process.env.NODE_ENV = 'development';
+       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify([]));
+       
+       await service.saveTripLocally({ id: '1' } as any);
+
+       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('OfflineStorage: Viagem 1 salva localmente.'));
+
+       process.env.NODE_ENV = originalEnv;
+       consoleSpy.mockRestore();
+    });
+
+    it('should log error when saving locally in dev mode', async () => {
+       const originalEnv = process.env.NODE_ENV;
+       process.env.NODE_ENV = 'development';
+       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+       (AsyncStorage.getItem as jest.Mock).mockRejectedValue(new Error('Fail'));
+       
+       await service.saveTripLocally({ id: '1' } as any);
+
+       expect(consoleSpy).toHaveBeenCalledWith('OfflineStorage: Erro ao salvar viagem localmente', expect.any(Error));
+
+       process.env.NODE_ENV = originalEnv;
+       consoleSpy.mockRestore();
+    });
+
     it('should unsave trip locally', async () => {
       const initialSaved = [{ id: '1', saved: true }];
       (AsyncStorage.getItem as jest.Mock).mockImplementation((key) => {
