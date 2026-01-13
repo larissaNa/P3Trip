@@ -44,8 +44,8 @@ Para executar este projeto localmente, siga os passos abaixo:
 
 2. **Clone o repositório:**
    ```bash
-   git clone https://github.com/seu-usuario/p3trip.git
-   cd p3trip
+   git clone https://github.com/larissaNa/P3Trip.git
+   cd P3Trip
    ```
 
 3. **Instale as dependências:**
@@ -96,8 +96,15 @@ O projeto adota uma estratégia de testes focada na **garantia da lógica de neg
 ### Distribuição de Testes (Unitários vs Integração)
 - **Testes Unitários (Maioria):** Focados na camada `ViewModel`, `Services` e `Repositories`.
   - *Justificativa:* A lógica complexa de estado, manipulação de dados e regras de negócio reside aqui. Testes unitários são rápidos e isolam falhas com precisão.
-- **Testes de Integração:** Validam o fluxo de dados entre o Service e o ViewModel.
-  - *Justificativa:* Garantem que os dados fluem corretamente da "API" (mockada) até o estado que a View consome.
+- **Testes de Integração:** Validam o fluxo completo entre as camadas **View ↔ ViewModel ↔ Services ↔ Repositories**.
+  - *Localização:* `__test__/integration/`
+  - *Justificativa:* Garantem que a interface do usuário (View) interage corretamente com a lógica de negócios e persistência, simulando cenários reais de uso (ex: carregar lista, favoritar viagem, persistência offline) utilizando mocks para dependências externas (Supabase, Navegação).
+
+### Executando os Testes
+Para rodar a suíte de testes completa:
+```bash
+npm test
+```
 
 ### Funcionalidades Desenvolvidas com TDD
 
@@ -133,6 +140,9 @@ npm test -- --watch
 
 # Executar testes e verificar cobertura (opcional se configurado)
 npm test -- --coverage
+
+#Executar testes de imtegração
+npx jest __test__/integration/SavedTripsIntegration.test.tsx
 ```
 
 ## Contribuição

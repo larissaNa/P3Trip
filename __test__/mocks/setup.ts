@@ -13,3 +13,31 @@ jest.mock('../../src/infra/supabase/supabase', () => ({
     },
   },
 }));
+
+// Mock global para React Navigation
+jest.mock('@react-navigation/native', () => {
+  const actualNav = jest.requireActual('@react-navigation/native');
+  const React = require('react');
+  return {
+    ...actualNav,
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+    }),
+    useFocusEffect: (callback: any) => {
+      React.useEffect(callback, []);
+    },
+    useRoute: jest.fn().mockReturnValue({ params: {} }),
+  };
+});
+
+// Mock global para Expo Vector Icons
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    Ionicons: (props: any) => React.createElement(Text, null, `Icon: ${props.name}`),
+    Feather: (props: any) => React.createElement(Text, null, `Feather: ${props.name}`),
+    MaterialIcons: (props: any) => React.createElement(Text, null, `Material: ${props.name}`),
+  };
+});
