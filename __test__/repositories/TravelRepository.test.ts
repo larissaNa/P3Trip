@@ -42,6 +42,30 @@ describe('TravelRepository', () => {
       expect(result[0].inclui).toEqual(['Aéreo', 'Hotel']);
     });
 
+    it('should map defaults when optional fields are missing', async () => {
+      const mockData = [
+        {
+          id: '2',
+          titulo: 'Lisboa',
+          descricao: 'Capital',
+          destino: 'Portugal',
+          preco: 800,
+          salvo: true,
+          data_range: '01-05 Mar',
+          dias: 5
+          // imagens e inclui ausentes
+        },
+      ];
+
+      const mockSelect = jest.fn().mockResolvedValue({ data: mockData, error: null });
+      mockFrom.mockReturnValue({ select: mockSelect });
+
+      const result = await repository.getAllTravels();
+
+      expect(result[0].images).toEqual([]);
+      expect(result[0].inclui).toEqual([]);
+    });
+
     it('should return empty array on error', async () => {
       const mockSelect = jest.fn().mockResolvedValue({ data: null, error: { message: 'Error' } });
       mockFrom.mockReturnValue({ select: mockSelect });
@@ -79,10 +103,27 @@ describe('TravelRepository', () => {
         const mockEq = jest.fn().mockResolvedValue({ data: null, error: { message: 'Error' } });
         const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
         mockFrom.mockReturnValue({ select: mockSelect });
-  
+
         const result = await repository.getSavedTravels();
-  
+
         expect(result).toEqual([]);
       });
+    
+    it('should map defaults when imagens missing in saved travels', async () => {
+      const mockData = [
+        {
+          id: '3',
+          titulo: 'Roma',
+          salvo: true
+          // imagens ausente
+        },
+      ];
+      const mockEq = jest.fn().mockResolvedValue({ data: mockData, error: null });
+      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+      mockFrom.mockReturnValue({ select: mockSelect });
+
+      const result = await repository.getSavedTravels();
+      expect(result[0].images).toEqual([]);
+    });
   });
 });

@@ -113,5 +113,82 @@ describe('TravelService', () => {
        expect(mockOffline.saveTripLocally).toHaveBeenCalled();
        expect(result).toBe(true);
     });
+
+    it('should unsave locally on server error', async () => {
+      const mockUpdate = jest.fn();
+      const mockEq2 = jest.fn().mockResolvedValue({ error: { message: 'Network error' } });
+      mockUpdate.mockReturnValue({ eq: mockEq2 });
+      mockFrom.mockReturnValue({ update: mockUpdate });
+
+      mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: true } as any]);
+
+      const result = await service.updateSavedStatus('1', false);
+
+      expect(mockOffline.unsaveTripLocally).toHaveBeenCalledWith('1');
+      expect(result).toBe(true);
+   });
+
+   it('should remove from cache on server success (unsave)', async () => {
+    const mockUpdate = jest.fn().mockResolvedValue({ error: null });
+    const mockEq2 = jest.fn().mockResolvedValue({ error: null });
+    mockUpdate.mockReturnValue({ eq: mockEq2 });
+    mockFrom.mockReturnValue({ update: mockUpdate });
+
+    mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: true } as any]);
+
+    const result = await service.updateSavedStatus('1', false);
+
+    expect(mockOffline.removeSavedTripFromCache).toHaveBeenCalledWith('1');
+    expect(result).toBe(true);
+  });
+  });
+
+  describe('syncPendingChanges', () => {
+    it('should do nothing if queue is empty', async () => {
+      mockOffline.getQueue.mockResolvedValue([]);
+      await service.syncPendingChanges();
+      expect(mockFrom).not.toHaveBeenCalled();
+    });
+
+    it('should sync items and clear queue on success', async () => {
+      mockOffline.getQueue
+        .mockResolvedValueOnce([
+          { type: 'save', id: '1' },
+          { type: 'unsave', id: '2' }
+        ])
+        .mockResolvedValue([]); // Subsequent calls return empty
+
+      const mockUpdate = jest.fn().mockResolvedValue({ error: null });
+      const mockEq = jest.fn().mockResolvedValue({ error: null });
+      mockUpdate.mockReturnValue({ eq: mockEq });
+      mockFrom.mockReturnValue({ update: mockUpdate });
+
+      // Mock repository calls that happen after sync
+      mockRepository.getAllTravels.mockResolvedValue([]);
+      mockRepository.getSavedTravels.mockResolvedValue([]);
+
+      await service.syncPendingChanges();
+
+      expect(mockFrom).toHaveBeenCalledTimes(2);
+      expect(mockOffline.setQueue).toHaveBeenCalledWith([]);
+      // Should refresh lists
+      expect(mockRepository.getAllTravels).toHaveBeenCalled();
+      expect(mockRepository.getSavedTravels).toHaveBeenCalled();
+    });
+
+    it('should keep failed items in queue', async () => {
+      mockOffline.getQueue.mockResolvedValue([
+        { type: 'save', id: '1' }
+      ]);
+
+      const mockUpdate = jest.fn().mockResolvedValue({ error: { message: 'Error' } });
+      const mockEq = jest.fn().mockResolvedValue({ error: { message: 'Error' } });
+      mockUpdate.mockReturnValue({ eq: mockEq });
+      mockFrom.mockReturnValue({ update: mockUpdate });
+
+      await service.syncPendingChanges();
+
+      expect(mockOffline.setQueue).toHaveBeenCalledWith([{ type: 'save', id: '1' }]);
+    });
   });
 });
