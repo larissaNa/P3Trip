@@ -54,7 +54,7 @@ async updateSavedStatus(id: string, saved: boolean) {
     if (error) {
       // Usamos console.log ou warn para evitar LogBox (tela vermelha) no app,
       // já que isso é um comportamento esperado quando offline.
-      console.log("Modo Offline: Salvando alteração localmente. Erro original:", error);
+      if (process.env.NODE_ENV !== "test") console.log("Modo Offline: Salvando alteração localmente. Erro original:", error);
       
       // Fallback: Tentar salvar localmente (Offline First)
       try {
@@ -70,7 +70,7 @@ async updateSavedStatus(id: string, saved: boolean) {
           return true; // Sucesso local
         }
       } catch (localError) {
-        console.error("Erro ao salvar localmente:", localError);
+        if (process.env.NODE_ENV !== "test") console.error("Erro ao salvar localmente:", localError);
       }
 
       return false;
@@ -97,7 +97,7 @@ async updateSavedStatus(id: string, saved: boolean) {
       const queue = await this.offline.getQueue();
       if (queue.length === 0) return;
 
-      console.log(`Sincronizando ${queue.length} alterações pendentes...`);
+      if (process.env.NODE_ENV !== "test") console.log(`Sincronizando ${queue.length} alterações pendentes...`);
 
       // Processar do mais antigo para o mais recente
       const itemsToProcess = [...queue].reverse();
@@ -110,10 +110,10 @@ async updateSavedStatus(id: string, saved: boolean) {
           .eq("id", item.id);
 
         if (error) {
-          console.error(`Erro ao sincronizar item ${item.id}:`, error);
+          if (process.env.NODE_ENV !== "test") console.error(`Erro ao sincronizar item ${item.id}:`, error);
           remainingQueue.push(item);
         } else {
-          console.log(`Item ${item.id} sincronizado com sucesso (${item.type})`);
+          if (process.env.NODE_ENV !== "test") console.log(`Item ${item.id} sincronizado com sucesso (${item.type})`);
         }
       }
 
@@ -126,7 +126,7 @@ async updateSavedStatus(id: string, saved: boolean) {
         await this.listSavedTravels();
       }
     } catch (error) {
-      console.error("Erro durante sincronização:", error);
+      if (process.env.NODE_ENV !== "test") console.error("Erro durante sincronização:", error);
     }
   }
 }

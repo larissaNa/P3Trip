@@ -35,9 +35,9 @@ export class OfflineStorageService {
       const next = exists ? list : [{ ...travel, saved: true }, ...list];
       await this.setSavedTrips(next);
       await this.enqueue({ type: "save", id: travel.id });
-      console.log(`OfflineStorage: Viagem ${travel.id} salva localmente.`);
+      if (process.env.NODE_ENV !== "test") console.log(`OfflineStorage: Viagem ${travel.id} salva localmente.`);
     } catch (e) {
-      console.error("OfflineStorage: Erro ao salvar viagem localmente", e);
+      if (process.env.NODE_ENV !== "test") console.error("OfflineStorage: Erro ao salvar viagem localmente", e);
     }
   }
 

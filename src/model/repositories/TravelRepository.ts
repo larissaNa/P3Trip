@@ -8,7 +8,7 @@ export class TravelRepository {
   const { data, error } = await supabase.from("viagem").select("*");
 
   if (error) {
-    console.error("Erro ao buscar viagens:", error);
+    if (process.env.NODE_ENV !== "test") console.error("Erro ao buscar viagens:", error);
     return [];
   }
 
@@ -33,7 +33,7 @@ export class TravelRepository {
       .eq("salvo", true);
 
     if (error) {
-      console.error("Erro ao buscar viagens salvas:", error);
+      if (process.env.NODE_ENV !== "test") console.error("Erro ao buscar viagens salvas:", error);
       return [];
     }
 

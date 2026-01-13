@@ -5,35 +5,35 @@ import { TravelService } from "../model/services/TravelService";
 export const HomeViewModel = () => {
   const service = new TravelService();
 
-  const [rawTravels, setRawTravels] = useState<Travel[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [travelData, setTravelData] = useState<Travel[]>([]);
+  const [allTravels, setAllTravels] = useState<Travel[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadTravels = async () => {
     setLoading(true);
     try {
       const travels = await service.listAllTravels();
-      setRawTravels(travels);
+      setAllTravels(travels);
+      setTravelData(travels);
     } catch {
-      setRawTravels([]);
+      setAllTravels([]);
+      setTravelData([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredTravels = useMemo(() => {
-    if (!searchQuery.trim()) return rawTravels;
-    
-    const lower = searchQuery.toLowerCase();
-    return rawTravels.filter(
-      (t) =>
-        t.title.toLowerCase().includes(lower) ||
-        t.destination.toLowerCase().includes(lower)
-    );
-  }, [rawTravels, searchQuery]);
-
   const search = (query: string) => {
-    setSearchQuery(query);
+    if (!query) {
+      setTravelData(allTravels);
+      return;
+    }
+    const lower = query.toLowerCase();
+    const filtered = allTravels.filter((t) =>
+      t.title.toLowerCase().includes(lower) ||
+      t.destination.toLowerCase().includes(lower)
+    );
+    setTravelData(filtered);
   };
 
   useEffect(() => {
