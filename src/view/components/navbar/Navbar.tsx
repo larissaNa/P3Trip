@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -14,7 +14,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
       {/* Linha superior */}
       <View style={styles.row}>
         {/* Logo */}
-        <View style={styles.logo} />
+        <Image source={require("../../../../assets/logo.jpg")} style={styles.logo} />
 
         <View style={styles.titleContainer} pointerEvents="none">
           <Text style={styles.title}>D&E Turismo</Text>
