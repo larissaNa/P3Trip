@@ -9,8 +9,13 @@ describe('TravelRepository', () => {
   const mockFrom = supabase.from as jest.Mock;
 
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     repository = new TravelRepository();
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('getAllTravels', () => {
@@ -40,6 +45,49 @@ describe('TravelRepository', () => {
       expect(result).toHaveLength(1);
       expect(result[0].title).toBe('Paris');
       expect(result[0].inclui).toEqual(['Aéreo', 'Hotel']);
+    });
+
+    it('should handle null fields by providing defaults', async () => {
+      const mockData = [
+        {
+          id: '3',
+          titulo: 'Null Fields Trip',
+          // imagens undefined
+          // salvo undefined
+          // inclui undefined
+        },
+      ];
+
+      const mockSelect = jest.fn().mockResolvedValue({ data: mockData, error: null });
+      mockFrom.mockReturnValue({ select: mockSelect });
+
+      const result = await repository.getAllTravels();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].images).toEqual([]);
+      expect(result[0].saved).toBe(false);
+      expect(result[0].inclui).toEqual([]);
+    });
+
+    it('should handle null fields in saved travels', async () => {
+      const mockData = [
+        {
+          id: '4',
+          titulo: 'Saved Null Fields',
+          // imagens undefined
+          // salvo undefined
+        },
+      ];
+
+      const mockEq = jest.fn().mockResolvedValue({ data: mockData, error: null });
+      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+      mockFrom.mockReturnValue({ select: mockSelect });
+
+      const result = await repository.getSavedTravels();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].images).toEqual([]);
+      expect(result[0].saved).toBe(false);
     });
 
     it('should return empty array on error', async () => {

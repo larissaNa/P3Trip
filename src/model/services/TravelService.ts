@@ -121,7 +121,8 @@ async updateSavedStatus(id: string, saved: boolean) {
       await this.offline.setQueue(remainingQueue.reverse());
       
       // Atualizar caches após sincronização
-      if (remainingQueue.length < queue.length) {
+      const hasSuccess = remainingQueue.length !== queue.length;
+      if (hasSuccess) {
         await this.listAllTravels();
         await this.listSavedTravels();
       }

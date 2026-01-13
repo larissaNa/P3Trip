@@ -73,4 +73,19 @@ describe('useTravelDetailsViewModel', () => {
     expect(spyOpen).toHaveBeenCalledWith(expect.stringContaining('https://wa.me/'));
     expect(spyOpen).toHaveBeenCalledWith(expect.stringContaining(encodeURIComponent('Atalaia Praia Boa')));
   });
+
+  it('deve lidar com erro ao abrir o WhatsApp', async () => {
+    const travel = { title: 'Erro Zap' };
+    const spyOpen = jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('Erro'));
+    
+    const { result } = renderHook(() => useTravelDetailsViewModel(travel));
+    
+    await act(async () => {
+        result.current.openWhatsApp();
+    });
+    
+    expect(spyOpen).toHaveBeenCalled();
+    // A função tem um .catch(() => {}) interno, então não deve lançar erro para fora.
+    // O teste passa se não quebrar.
+  });
 });

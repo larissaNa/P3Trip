@@ -83,4 +83,16 @@ describe('HomeViewModel', () => {
 
     expect(result.current.travelData).toHaveLength(3);
   });
+
+  it('deve lidar com erro ao carregar viagens', async () => {
+    (TravelService as jest.Mock).mockImplementation(() => ({
+      listAllTravels: jest.fn().mockRejectedValue(new Error('Erro ao carregar')),
+    }));
+
+    const { result } = renderHook(() => HomeViewModel());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.travelData).toEqual([]);
+  });
 });
