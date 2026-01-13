@@ -110,22 +110,35 @@ npm test
 
 Aplicamos o Test-Driven Development (TDD) em funcionalidades críticas para garantir robustez desde o início.
 
-#### 1. Gerenciamento de Viagens Salvas (`useSavedTripsViewModel`)
-- **Problema:** Necessidade de carregar viagens salvas apenas quando a tela ganha foco, lidar com estados de carregamento e falhas silenciosas.
-- **Primeiro Teste:** `carrega viagens salvas no foco com sucesso`. O teste falhou inicialmente pois a lógica não existia.
-- **Evolução:**
-  1. Implementou-se o `loadSaved` básico -> Teste passou.
-  2. Adicionou-se o `useFocusEffect` para recarregar ao voltar para a tela -> Novos testes de recarga.
-  3. Adicionou-se tratamento de erro (`try/catch`) para garantir que a lista fique vazia em caso de falha, sem quebrar o app.
+#### 1. Busca de Viagens na Home (`useHomeViewModel`)
 
-#### 2. Ações de Detalhes da Viagem (`useTravelDetailsViewModel`)
-- **Problema:** O usuário precisa favoritar viagens (toggle) com feedback instantâneo (Optimistic UI) e abrir o WhatsApp com mensagem formatada.
-- **Primeiro Teste:** `toggleSave alterna o estado e chama o service`.
-- **Evolução:**
-  1. Implementou-se a troca de estado local -> Teste passou.
-  2. Criou-se o teste `reverte o estado quando service retorna false` para garantir consistência de dados.
-  3. Implementou-se a lógica de reversão (rollback) no `catch` e `if(!ok)`.
-  4. Implementou-se a função `openWhatsApp` garantindo a codificação correta da URL (URL Encoding) através de testes específicos de string.
+* **Problema:** Dificuldade do usuário em encontrar viagens específicas em uma lista grande. O motor de busca permite filtrar instantaneamente as viagens exibidas na tela inicial digitando termos comuns (como "praia", "serra" ou o nome do destino), melhorando a experiência de navegação e descoberta.
+* **Primeiros Testes:** Escritos em `useHomeViewModel.test.ts` antes de qualquer lógica de filtro existir (Fase Red):
+
+  1. **Filtro por termo existente:** Ao chamar `search('praia')`, a lista retornava apenas as viagens que continham essa palavra no título ou destino.
+  2. **Limpeza de busca:** Ao passar uma string vazia `search('')`, a lista voltava a exibir todas as viagens originais.
+  3. **Filtro case-insensitive:** Validado implicitamente no primeiro teste, garantindo que a busca funcione independente de letras maiúsculas ou minúsculas.
+* **Evolução (TDD):**
+
+  1. **Fase Red (Falha):** O teste falhou inicialmente com `TypeError: result.current.search is not a function`, provando que a funcionalidade não existia.
+  2. **Fase Green (Funcional):** Implementou-se a solução mais simples possível criando um estado `searchQuery` e um `useEffect` que observava esse estado para atualizar uma lista separada `filteredTravels`, apenas para fazer os testes passarem.
+  3. **Fase Refactor (Otimizado):** Refatorou-se a lógica para usar `useMemo`, eliminando estado duplicado (`raw` e `filtered`) e o `useEffect`. A lista filtrada passou a ser um valor computado, reduzindo renderizações desnecessárias e garantindo sincronização com a lista original, sem alterar o comportamento validado pelos testes.
+
+#### 2. Notificações Push (`Push Notifications`)
+
+* **Problema:** Necessidade de gerenciar o registro de notificações Push, garantindo que o app tenha permissão, um token válido e canais configurados (Android) para receber alertas.
+* **Primeiros Testes:** Escritos para validar os seguintes cenários:
+
+  1. Bloqueio de execução em dispositivos não físicos.
+  2. Sucesso ao obter token quando a permissão é concedida.
+  3. Retorno nulo quando a permissão é negada.
+  4. Configuração correta do canal de notificação no Android.
+  5. Registro dos listeners de notificações.
+* **Evolução (TDD):**
+
+  1. **Fase Red (Inexistente):** A funcionalidade não existia, fazendo todos os testes falharem inicialmente.
+  2. **Fase Green (Funcional):** Implementou-se uma lógica direta e funcional para garantir a aprovação dos testes.
+  3. **Fase Refactor (Organizado):** A lógica foi reorganizada em métodos menores e mais legíveis (`ensurePermissions`, `getPushToken`), mantendo o comportamento validado pelos testes e melhorando a manutenibilidade do código.
 
 ### Executando os Testes
 
@@ -138,7 +151,7 @@ npm test
 # Executar testes em modo watch (desenvolvimento)
 npm test -- --watch
 
-# Executar testes e verificar cobertura (opcional se configurado)
+# Executar testes e verificar cobertura
 npm test -- --coverage
 
 #Executar testes de imtegração
