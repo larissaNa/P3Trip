@@ -85,6 +85,18 @@ describe('NotificationService', () => {
         importance: Notifications.AndroidImportance.MAX,
       }));
     });
+
+    it('não deve configurar canal de notificação se não for Android', async () => {
+      (Device.isDevice as any) = true;
+      Platform.OS = 'ios';
+      
+      (Notifications.getPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
+      (Notifications.getExpoPushTokenAsync as jest.Mock).mockResolvedValue({ data: 'token' });
+
+      await service.registerForPushNotificationsAsync();
+
+      expect(Notifications.setNotificationChannelAsync).not.toHaveBeenCalled();
+    });
   });
 
   describe('Listeners', () => {

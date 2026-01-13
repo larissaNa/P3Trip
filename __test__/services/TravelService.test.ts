@@ -141,6 +141,35 @@ describe('TravelService', () => {
     expect(mockOffline.removeSavedTripFromCache).toHaveBeenCalledWith('1');
     expect(result).toBe(true);
   });
+
+  it('should handle unexpected error in updateSavedStatus (outer try/catch)', async () => {
+     // Mock throw error from supabase
+     mockFrom.mockImplementation(() => { throw new Error('Unexpected'); });
+     
+     mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: false } as any]);
+
+     // Should fall through to offline save
+     const result = await service.updateSavedStatus('1', true);
+     
+     expect(mockOffline.saveTripLocally).toHaveBeenCalled();
+     expect(result).toBe(true);
+  });
+
+  it('should handle error when saving locally (fallback)', async () => {
+    const mockUpdate = jest.fn();
+    const mockEq2 = jest.fn().mockResolvedValue({ error: { message: 'Network error' } });
+    mockUpdate.mockReturnValue({ eq: mockEq2 });
+    mockFrom.mockReturnValue({ update: mockUpdate });
+
+    // Mock local save failure
+    mockOffline.getCachedTrips.mockRejectedValue(new Error('Local storage error'));
+    
+    // We also want to cover the console.error if NODE_ENV is not test, 
+    // but here we just want to ensure it returns false (failed both remote and local)
+    const result = await service.updateSavedStatus('1', true);
+
+    expect(result).toBe(false);
+  });
   });
 
   describe('syncPendingChanges', () => {
@@ -189,6 +218,21 @@ describe('TravelService', () => {
       await service.syncPendingChanges();
 
       expect(mockOffline.setQueue).toHaveBeenCalledWith([{ type: 'save', id: '1' }]);
+    });
+
+    it('should log error during sync failure', async () => {
+        const originalEnv = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'development';
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+        mockOffline.getQueue.mockRejectedValue(new Error('Sync Error'));
+
+        await service.syncPendingChanges();
+
+        expect(consoleSpy).toHaveBeenCalledWith('Erro durante sincronização:', expect.any(Error));
+
+        process.env.NODE_ENV = originalEnv;
+        consoleSpy.mockRestore();
     });
   });
 });
