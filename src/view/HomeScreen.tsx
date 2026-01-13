@@ -121,19 +121,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 40,
-    marginTop: 40, 
+    marginTop: 40,
   },
+
   emptyTitle: {
     marginTop: 12,
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Nunito-Bold",
     color: "#333",
   },
+
   emptySubtitle: {
     marginTop: 6,
     textAlign: "center",
+    fontFamily: "Nunito-Regular",
     color: "#777",
   },
+
   button: {
     marginTop: 20,
     backgroundColor: "#2c83e5",
@@ -141,27 +145,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     borderRadius: 26,
   },
+
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "Nunito-SemiBold",
   },
-  
+
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 82,
     right: 30,
-    backgroundColor: '#a7c9ffff',
+    backgroundColor: "#a7c9ffff",
     width: 70,
     height: 70,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 10,
     elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
-  }
+  },
 });

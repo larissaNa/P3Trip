@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: "Nunito-ExtraBold",
+    color: "#191919ff",
   },
 
   emptyContainer: {
@@ -77,13 +78,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     marginTop: 12,
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Nunito-Bold",
     color: "#333",
   },
 
   emptySubtitle: {
     marginTop: 6,
     textAlign: "center",
+    fontFamily: "Nunito-Regular",
     color: "#777",
   },
 
@@ -98,6 +100,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "Nunito-SemiBold",
   },
 });
