@@ -19,7 +19,7 @@ export function useTravelDetailsViewModel(travel: any) {
   };
 
   const openWhatsApp = () => {
-    const phone = "5586998527609";
+    const phone = "5586999653516";
     const message = `Olá! Quero reservar o pacote: ${travel.title}`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     void Linking.openURL(url).catch(() => {});
