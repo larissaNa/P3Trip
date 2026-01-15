@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Travel } from "../model/entities/Travel";
 import { TravelService } from "../model/services/TravelService";
 
@@ -35,9 +36,11 @@ export const HomeViewModel = () => {
     setSearchQuery(query);
   };
 
-  useEffect(() => {
-    loadTravels();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadTravels();
+    }, [])
+  );
 
   return {
     travelData: filteredTravels,

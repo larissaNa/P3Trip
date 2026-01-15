@@ -13,7 +13,7 @@ export class TravelRepository {
   }
 
   return data.map((item: any) => ({
-    id: item.id,
+    id: String(item.id),
     title: item.titulo,
     description: item.descricao,
     destination: item.destino,
@@ -38,7 +38,7 @@ export class TravelRepository {
     }
 
     return data.map((item: any) => ({
-      id: item.id,
+      id: String(item.id),
       title: item.titulo,
       description: item.descricao,
       destination: item.destino,

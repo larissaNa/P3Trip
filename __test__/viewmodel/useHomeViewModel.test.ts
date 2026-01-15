@@ -5,6 +5,16 @@ import { TravelService } from '../../src/model/services/TravelService';
 // Mock do Service
 jest.mock('../../src/model/services/TravelService');
 
+// Mock do React Navigation
+jest.mock('@react-navigation/native', () => {
+  const React = require('react');
+  return {
+    useFocusEffect: (callback: any) => {
+      React.useEffect(callback, []);
+    },
+  };
+});
+
 describe('HomeViewModel', () => {
   const mockTravels = [
     { 
