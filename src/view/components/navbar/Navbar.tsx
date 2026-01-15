@@ -1,6 +1,7 @@
 import { View, Text, TextInput, Pressable, StyleSheet, Image } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
 
 interface NavbarProps {
   onSearch?: (text: string) => void;
@@ -8,6 +9,17 @@ interface NavbarProps {
 
 export default function Navbar({ onSearch }: NavbarProps) {
   const navigation = useNavigation<any>();
+  const [searchText, setSearchText] = useState("");
+
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (onSearch) onSearch(text);
+  };
+
+  const handleClear = () => {
+    setSearchText("");
+    if (onSearch) onSearch("");
+  };
 
   return (
     <View style={styles.headerContainer}>
@@ -49,19 +61,26 @@ export default function Navbar({ onSearch }: NavbarProps) {
 
       {/* Barra de busca */}
       <View style={styles.searchBar}>
+        <Feather
+          name="search"
+          size={20}
+          color="#777"
+          style={{ marginRight: 8 }}
+        />
+
         <TextInput
           placeholder="Ex: Praia, Serviços..."
           placeholderTextColor="#999"
           style={styles.input}
-          onChangeText={onSearch}
+          onChangeText={handleSearch}
+          value={searchText}
         />
 
-        <Feather
-          name="search"
-          size={18}
-          color="#777"
-          style={{ marginRight: 8 }}
-        />
+        {searchText.length > 0 && (
+          <Pressable onPress={handleClear} hitSlop={10}>
+            <Feather name="x" size={20} color="#777" />
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -84,9 +103,9 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     marginLeft: 2,
     backgroundColor: "#fbfcffff",
   },
