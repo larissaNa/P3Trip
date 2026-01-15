@@ -42,6 +42,23 @@ describe('TravelRepository', () => {
       expect(result[0].inclui).toEqual(['Aéreo', 'Hotel']);
     });
 
+    it('should convert id to string', async () => {
+        const mockData = [
+          {
+            id: 123, // Number
+            titulo: 'Trip',
+          },
+        ];
+  
+        const mockSelect = jest.fn().mockResolvedValue({ data: mockData, error: null });
+        mockFrom.mockReturnValue({ select: mockSelect });
+  
+        const result = await repository.getAllTravels();
+  
+        expect(result[0].id).toBe('123');
+        expect(typeof result[0].id).toBe('string');
+      });
+
     it('should map defaults when optional fields are missing', async () => {
       const mockData = [
         {
