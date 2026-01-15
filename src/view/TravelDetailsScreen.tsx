@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +7,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
@@ -22,6 +25,20 @@ export default function TravelDetailsScreen() {
   const { isSaved, toggleSave, openWhatsApp } =
     useTravelDetailsViewModel(travel);
 
+  const hasMultipleImages =
+    Array.isArray(travel.images) && travel.images.length > 1;
+
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+
+  const handleMomentumScrollEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const imageWidth = screenWidth - 32 + 16;
+    const index = Math.round(offsetX / imageWidth);
+    setCurrentImageIndex(index);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -35,32 +52,53 @@ export default function TravelDetailsScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.carouselContainer}
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-          snapToInterval={screenWidth - 32 + 16}
-          decelerationRate="fast"
-        >
-          {travel.images?.map((img: string, index: number) => {
-            const isLast = index === travel.images.length - 1;
+        <View style={styles.carouselWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.carouselContainer}
+            contentContainerStyle={{ paddingHorizontal: 16 }}
+            snapToInterval={screenWidth - 32 + 16}
+            decelerationRate="fast"
+            onMomentumScrollEnd={handleMomentumScrollEnd}
+          >
+            {travel.images?.map((img: string, index: number) => {
+              const isLast = index === travel.images.length - 1;
 
-            return (
-              <Image
-                key={index}
-                source={{ uri: img }}
-                style={[
-                  styles.carouselImage,
-                  {
-                    width: screenWidth - 32,
-                    marginRight: isLast ? 0 : 16,
-                  },
-                ]}
-              />
-            );
-          })}
-        </ScrollView>
+              return (
+                <Image
+                  key={index}
+                  source={{ uri: img }}
+                  style={[
+                    styles.carouselImage,
+                    {
+                      width: screenWidth - 32,
+                      marginRight: isLast ? 0 : 16,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </ScrollView>
+
+          {hasMultipleImages && (
+            <View style={styles.dotsContainer}>
+              {travel.images?.map((_: string, index: number) => {
+                const isActive = index === currentImageIndex;
+
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.dot,
+                      isActive && styles.dotActive,
+                    ]}
+                  />
+                );
+              })}
+            </View>
+          )}
+        </View>
 
         {/* Conteúdo */}
         <View style={styles.content}>
@@ -158,6 +196,10 @@ const styles = StyleSheet.create({
     color: "#191919ff",
   },
 
+  carouselWrapper: {
+    position: "relative",
+  },
+
   carouselContainer: {
     width: "100%",
     height: 180,
@@ -166,6 +208,28 @@ const styles = StyleSheet.create({
   carouselImage: {
     height: 180,
     borderRadius: 26,
+  },
+
+  dotsContainer: {
+    position: "absolute",
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    marginHorizontal: 4,
+  },
+
+  dotActive: {
+    backgroundColor: "#2c83e5",
   },
 
   content: {
