@@ -12,6 +12,37 @@ export class TravelService {
     this.offline = new OfflineStorageService();
   }
 
+  async getTravelById(id: string): Promise<Travel | null> {
+    try {
+      const { data, error } = await supabase
+        .from("viagem")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error || !data) {
+        if (process.env.NODE_ENV !== "test" && error) console.error("Erro ao buscar viagem por id:", error);
+        return null;
+      }
+
+      return {
+        id: String(data.id),
+        title: data.titulo,
+        description: data.descricao,
+        destination: data.destino,
+        price: data.preco,
+        images: data.imagens ?? [],
+        saved: data.salvo ?? false,
+        dateRange: data.data_range,
+        days: data.dias,
+        inclui: data.inclui ?? [],
+      };
+    } catch (e) {
+      if (process.env.NODE_ENV !== "test") console.error("Erro inesperado ao buscar viagem por id:", e);
+      return null;
+    }
+  }
+
   async listAllTravels() {
     const data = await this.repository.getAllTravels();
     if (data.length > 0) {

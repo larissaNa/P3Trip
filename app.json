@@ -20,14 +20,32 @@
         "foregroundImage": "./assets/P3Tripicon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "android.permission.NOTIFICATIONS",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "googleServicesFile": "./google-services.json",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.P3Trip"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/P3Tripicon.png",
+          "color": "#ffffff"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1b21a7d2-62c2-469e-b4bd-b67be1ab1695"
+      }
+    }
   }
 }
