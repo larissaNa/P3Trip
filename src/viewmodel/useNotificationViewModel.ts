@@ -1,83 +1,65 @@
 import { useEffect, useState, useCallback } from "react";
+import { Alert } from "react-native";
+import { NotificationService } from "../model/services/NotificationService";
+import { NotificationEntity } from "../model/entities/Notification";
 import * as Notifications from "expo-notifications";
-import { Notification } from "../model/entities/Notification";
-import { NotificationRepository } from "../model/repositories/NotificationRepository";
-
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-
-  return date.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export function useNotificationViewModel() {
-  const repository = new NotificationRepository();
+  const service = new NotificationService();
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationEntity[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const loadNotifications = useCallback(async () => {
-    const data = await repository.getAll();
+  const loadHistory = useCallback(async () => {
+    setLoading(true);
+    const history = await service.getHistory();
 
-    if (data.length === 0) {
+    if (history.length === 0) {
       setNotifications([
         {
           id: "empty",
           title: "Nenhuma notificação!",
-          message: "Ainda não recebemos notificações para este dispositivo.",
+          body: "Ainda não recebemos notificações.",
           receivedAt: "",
-          icon: "bell",
         },
       ]);
     } else {
-      setNotifications(data);
+      setNotifications(history);
     }
+
+    setLoading(false);
   }, []);
 
   useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+    loadHistory();
 
-  useEffect(() => {
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        const { title, body } = notification.request.content;
-
-        const newItem: Notification = {
-          id: notification.request.identifier,
-          title: title || "Notificação",
-          message: body || "",
-          receivedAt: new Date().toISOString(),
-          icon: "bell",
-        };
-
-        setNotifications((prev) => {
-          const current = prev.filter((n) => n.id !== "empty");
-          return [newItem, ...current];
-        });
-      }
+    const unsubscribe = service.setupListeners(
+      async (notification) => {
+        await service.saveNotification(notification);
+        loadHistory();
+      },
+      () => {}
     );
 
-    return () => subscription.remove();
-  }, []);
+    return unsubscribe;
+  }, [loadHistory]);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadNotifications();
-    setRefreshing(false);
+  const registerPush = async () => {
+    try {
+      await service.registerAndSavePushToken();
+    } catch (e: any) {
+      if (e.message === "PERMISSION_DENIED") {
+        Alert.alert("Permissão necessária", "Ative nas configurações");
+      } else if (e.message === "DEVICE_NOT_SUPPORTED") {
+        Alert.alert("Erro", "Use um dispositivo físico");
+      }
+    }
   };
 
   return {
-    notifications: notifications.map((n) => ({
-      ...n,
-      time: formatDate(n.receivedAt),
-    })),
-    refreshing,
-    onRefresh,
+    notifications,
+    loading,
+    reload: loadHistory,
+    registerPush,
   };
 }

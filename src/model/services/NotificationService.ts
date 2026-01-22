@@ -1,170 +1,108 @@
-import { Alert, Platform, Linking } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { supabase } from '../../infra/supabase/supabase';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
-
-type StoredNotification = {
-  id: string;
-  title: string;
-  body: string;
-  receivedAt: string;
-  data?: any;
-};
-
-const NOTIFICATION_HISTORY_KEY = '@p3trip/notifications';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+import { supabase } from "../../infra/supabase/supabase";
+import { NotificationRepository } from "../repositories/NotificationRepository";
+import { NotificationEntity } from "../entities/Notification";
 
 export class NotificationService {
-  async registerForPushNotificationsAsync(): Promise<string | null> {
+  private repo = new NotificationRepository();
+
+  async registerForPushNotifications(): Promise<string> {
     if (!Device.isDevice) {
-      Alert.alert(
-        'Dispositivo Virtual Detectado',
-        'Notificações Push não funcionam em emuladores/simuladores. Por favor, teste em um dispositivo físico.'
-      );
-      return null;
+      throw new Error("DEVICE_NOT_SUPPORTED");
     }
 
-    const hasPermission = await this.ensurePermissions();
-    if (!hasPermission) {
-      Alert.alert(
-        'Permissão Negada',
-        'Não foi possível obter permissão para notificações. Vá nas configurações do app e ative manualmente.'
-      );
-      return null;
+    const permission = await this.ensurePermissions();
+    if (!permission) {
+      throw new Error("PERMISSION_DENIED");
     }
 
-    try {
-      const token = await this.getPushToken();
-      await this.setupAndroidChannel();
-      return token;
-    } catch (error: any) {
-      Alert.alert('Erro ao pegar Token', `Erro: ${error.message}`);
-      console.error(error);
-      return null;
-    }
+    const token = await this.getPushToken();
+    await this.setupAndroidChannel();
+    return token;
   }
 
-  async registerAndSavePushToken(): Promise<string | null> {
-    const token = await this.registerForPushNotificationsAsync();
-    if (!token) {
-      return null;
-    }
+  async registerAndSavePushToken(): Promise<string> {
+    const token = await this.registerForPushNotifications();
 
-    try {
-      const now = new Date().toISOString();
-      // Salva ou atualiza o token no Supabase
-      const { error } = await supabase.from('push_tokens').upsert(
-        [
-          { 
-            token: token,
-            updated_at: now // Nome da coluna corrigido: updated_at
-          }
-        ],
-        { onConflict: 'token' }
-      );
+    const { error } = await supabase.from("push_tokens").upsert(
+      [{ token, updated_at: new Date().toISOString() }],
+      { onConflict: "token" }
+    );
 
-      if (error) {
-        Alert.alert("Erro ao Salvar Token", `Falha ao registrar dispositivo: ${error.message}`);
-        console.error("Erro Supabase:", error);
-      } else {
-        // Opcional: Remover este alerta depois de validar que funcionou
-        // Alert.alert("Sucesso", "Dispositivo registrado para notificações!");
-      }
-    } catch (error: any) {
-      Alert.alert("Erro Inesperado", `Falha ao salvar token: ${error.message}`);
-      console.error('Erro ao salvar push token:', error);
+    if (error) {
+      throw new Error("SUPABASE_ERROR");
     }
 
     return token;
   }
 
-  private async ensurePermissions(): Promise<boolean> {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+  async saveNotification(notification: Notifications.Notification) {
+    const entity: NotificationEntity = {
+      id: notification.request.identifier || String(Date.now()),
+      title: notification.request.content.title ?? "",
+      body: notification.request.content.body ?? "",
+      receivedAt: new Date().toISOString(),
+      data: notification.request.content.data,
+    };
 
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync({
-        ios: {
-          allowAlert: true,
-          allowBadge: true,
-          allowSound: true,
-        },
-      });
-      finalStatus = status;
-    }
-
-    if (finalStatus !== 'granted') {
-      Alert.alert(
-        "Permissão Necessária",
-        "Para receber notificações de viagens, você precisa habilitar as permissões nas configurações.",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Abrir Configurações", onPress: () => Linking.openSettings() }
-        ]
-      );
-      return false;
-    }
-
-    return true;
+    await this.repo.append(entity);
   }
 
-  private async getPushToken(): Promise<string> {
-    // Tenta pegar o Project ID do app.json/app.config.js se existir
-    const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-
-    const options: Notifications.ExpoPushTokenOptions = projectId ? { projectId } : {};
-    
-    const tokenData = await Notifications.getExpoPushTokenAsync(options);
-    return tokenData.data;
+  async getHistory(): Promise<NotificationEntity[]> {
+    return this.repo.getAll();
   }
 
-  private async setupAndroidChannel(): Promise<void> {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  }
-
-  setupNotificationListeners(
-    onNotification: (notification: Notifications.Notification) => void,
+  setupListeners(
+    onReceive: (notification: Notifications.Notification) => void,
     onResponse: (response: Notifications.NotificationResponse) => void
   ): () => void {
-    const notificationListener = Notifications.addNotificationReceivedListener(onNotification);
-    const responseListener = Notifications.addNotificationResponseReceivedListener(onResponse);
+    const receiveSub =
+      Notifications.addNotificationReceivedListener(onReceive);
+
+    const responseSub =
+      Notifications.addNotificationResponseReceivedListener(onResponse);
 
     return () => {
-      notificationListener.remove();
-      responseListener.remove();
+      receiveSub.remove();
+      responseSub.remove();
     };
   }
 
-  async appendNotificationToHistory(notification: Notifications.Notification): Promise<void> {
-    const { title, body, data } = notification.request.content;
-    const safeTitle = title ?? '';
-    const safeBody = body ?? '';
-    const id = notification.request.identifier || String(Date.now());
-    const receivedAt = new Date().toISOString();
+  // ===== PRIVATE =====
 
-    const stored = await this.getNotificationHistory();
-    const next: StoredNotification[] = [{ id, title: safeTitle, body: safeBody, receivedAt, data }, ...stored];
-    const limited = next.slice(0, 50);
-    await AsyncStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(limited));
+  private async ensurePermissions(): Promise<boolean> {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status === "granted") return true;
+
+    const request = await Notifications.requestPermissionsAsync({
+      ios: { allowAlert: true, allowBadge: true, allowSound: true },
+    });
+
+    return request.status === "granted";
   }
 
-  async getNotificationHistory(): Promise<StoredNotification[]> {
-    const raw = await AsyncStorage.getItem(NOTIFICATION_HISTORY_KEY);
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
+  private async getPushToken(): Promise<string> {
+    const projectId =
+      Constants?.expoConfig?.extra?.eas?.projectId ??
+      Constants?.easConfig?.projectId;
+
+    const token = await Notifications.getExpoPushTokenAsync(
+      projectId ? { projectId } : {}
+    );
+
+    return token.data;
+  }
+
+  private async setupAndroidChannel() {
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+      });
     }
   }
 }
