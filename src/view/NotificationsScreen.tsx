@@ -17,23 +17,14 @@ export default function NotificationsScreen({ navigation }: any) {
       </View>
 
       <ScrollView
-        style={{ paddingHorizontal: 16 }}
         refreshControl={
-          <RefreshControl
-            refreshing={vm.refreshing}
-            onRefresh={vm.onRefresh}
-            colors={["#2c83e5"]}
-          />
+          <RefreshControl refreshing={vm.loading} onRefresh={vm.reload} />
         }
       >
         {vm.notifications.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Feather name={item.icon as any} size={22} color="#2c83e5" />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardMsg}>{item.message}</Text>
-              <Text style={styles.cardTime}>{item.time}</Text>
-            </View>
+          <View key={item.id}>
+            <Text>{item.title}</Text>
+            <Text>{item.body}</Text>
           </View>
         ))}
       </ScrollView>

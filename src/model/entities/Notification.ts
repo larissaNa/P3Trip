@@ -5,3 +5,12 @@ export interface Notification {
   receivedAt: string;
   icon: string;
 }
+
+export interface NotificationEntity {
+  id: string;
+  title: string;
+  body: string;
+  receivedAt: string;
+  data?: any;
+}
+

@@ -1,22 +1,30 @@
-import { NotificationService } from "../services/NotificationService";
-import { Notification } from "../entities/Notification";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NotificationEntity } from "../entities/Notification";
+
+const STORAGE_KEY = "@p3trip/notifications";
 
 export class NotificationRepository {
-  private service = new NotificationService();
+  async getAll(): Promise<NotificationEntity[]> {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
 
-  async getAll(): Promise<Notification[]> {
-    const history = await this.service.getNotificationHistory();
-
-    if (!history || history.length === 0) {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
       return [];
     }
+  }
 
-    return history.map((item) => ({
-      id: item.id,
-      title: item.title || "Notificação",
-      message: item.body,
-      receivedAt: item.receivedAt,
-      icon: "bell",
-    }));
+  async saveAll(notifications: NotificationEntity[]): Promise<void> {
+    await AsyncStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(notifications.slice(0, 50))
+    );
+  }
+
+  async append(notification: NotificationEntity): Promise<void> {
+    const current = await this.getAll();
+    await this.saveAll([notification, ...current]);
   }
 }
