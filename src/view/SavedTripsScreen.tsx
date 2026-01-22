@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
@@ -12,6 +12,9 @@ export default function SavedTripsScreen() {
   const navigation = useNavigation<SavedTripsNavProp>();
   const vm = useSavedTripsViewModel();
 
+  // Loading tela cheia apenas se não houver dados
+  const showFullScreenLoading = vm.loading && vm.savedTrips.length === 0;
+
   return (
     <View style={styles.container}>
       
@@ -24,25 +27,47 @@ export default function SavedTripsScreen() {
         <View style={{ width: 26 }} />
       </View>
 
-      {vm.loading ? (
+      {showFullScreenLoading ? (
         <ActivityIndicator size="large" color="#2c83e5" style={{ marginTop: 40 }} />
       ) : vm.savedTrips.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="bookmark-outline" size={60} color="#777" />
-          <Text style={styles.emptyTitle}>Nenhuma viagem salva</Text>
-          <Text style={styles.emptySubtitle}>
-            Comece a salvar suas viagens favoritas para visualizar depois.
-          </Text>
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={vm.loading}
+              onRefresh={vm.reload}
+              colors={["#2c83e5"]}
+              tintColor="#2c83e5"
+            />
+          }
+        >
+          <View style={styles.emptyContainer}>
+            <Ionicons name="bookmark-outline" size={60} color="#777" />
+            <Text style={styles.emptyTitle}>Nenhuma viagem salva</Text>
+            <Text style={styles.emptySubtitle}>
+              Comece a salvar suas viagens favoritas para visualizar depois.
+            </Text>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Home")}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText}>Explorar viagens</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Home")}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Explorar viagens</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <ScrollView 
+          contentContainerStyle={{ padding: 16 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={vm.loading}
+              onRefresh={vm.reload}
+              colors={["#2c83e5"]}
+              tintColor="#2c83e5"
+            />
+          }
+        >
           {vm.savedTrips.map((item) => (
             <TravelCard
               key={item.id}

@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -23,6 +24,10 @@ export default function HomeScreen() {
   const vm = HomeViewModel();
   const navigation = useNavigation<HomeNavProp>();
 
+  // Se estiver carregando e não tiver dados, mostra loading tela cheia
+  // Se tiver dados, o loading acontece via RefreshControl
+  const showFullScreenLoading = vm.loading && vm.travelData.length === 0;
+
   return (
     <View style={{ flex: 1, backgroundColor: "#a7c9ffff" }}>
       <Animated.ScrollView
@@ -31,6 +36,15 @@ export default function HomeScreen() {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         onScroll={vm.onScroll}
+        refreshControl={
+          <RefreshControl
+            refreshing={vm.loading}
+            onRefresh={vm.reload}
+            colors={["#2c83e5"]}
+            tintColor="#2c83e5"
+            progressViewOffset={vm.navbarHeight + 10} // Ajuste para aparecer abaixo da navbar
+          />
+        }
       >
         {/* Navbar fixa */}
         <Animated.View
@@ -64,7 +78,7 @@ export default function HomeScreen() {
             elevation: 10,
           }}
         >
-          {vm.loading ? (
+          {showFullScreenLoading ? (
             <ActivityIndicator size="large" color="#2c83e5" style={{ marginTop: 40 }} />
           ) : vm.travelData.length === 0 ? (
             <View style={styles.emptyContainer}>

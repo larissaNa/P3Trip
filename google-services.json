@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "426751165262",
+    "project_id": "p3trip-18fee",
+    "storage_bucket": "p3trip-18fee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426751165262:android:058ecdf37483145451941f",
+        "android_client_info": {
+          "package_name": "com.anonymous.P3Trip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE3w-u9njtQkvMT2ZNiQ7f_thmbdXl1lQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

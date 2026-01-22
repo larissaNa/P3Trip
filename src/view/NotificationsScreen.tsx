@@ -23,16 +23,64 @@ export default function NotificationsScreen() {
       </View>
 
       <ScrollView
+        contentContainerStyle={{ paddingBottom: 20 }}
         refreshControl={
-          <RefreshControl refreshing={vm.loading} onRefresh={vm.reload} />
+          <RefreshControl 
+            refreshing={vm.loading} 
+            onRefresh={vm.reload} 
+            colors={["#0056b3"]} // Android
+            tintColor="#0056b3"  // iOS
+          />
         }
       >
-        {vm.notifications.map((item) => (
-          <View key={item.id}>
-            <Text>{item.title}</Text>
-            <Text>{item.body}</Text>
-          </View>
-        ))}
+        {vm.notifications.map((item) => {
+          if (item.id === 'empty') {
+             return (
+               <View key={item.id} style={[styles.card, { borderBottomWidth: 0, justifyContent: 'center', flexDirection: 'column', alignItems: 'center', paddingTop: 60 }]}>
+                 <Ionicons name="notifications-off-outline" size={48} color="#ccc" />
+                 <Text style={[styles.cardTitle, { color: '#888', marginTop: 16 }]}>{item.title}</Text>
+                 <Text style={styles.cardMsg}>{item.body}</Text>
+               </View>
+             );
+          }
+
+          return (
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.card}
+              onPress={async () => {
+                const travel = await vm.handleNotificationPress(item);
+                if (travel) {
+                  navigation.navigate("TravelDetails", { travel });
+                } else {
+                  console.log("Não foi possível carregar a viagem ou não há viagem associada.");
+                }
+              }}
+            >
+              <View style={{ marginRight: 12, justifyContent: 'center' }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#e1e8ed', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="notifications-outline" size={20} color="#0056b3" />
+                </View>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  {item.receivedAt ? (
+                    <Text style={styles.cardTime}>
+                      {new Date(item.receivedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={styles.cardMsg}>{item.body}</Text>
+                {item.receivedAt ? (
+                   <Text style={styles.cardTime}>
+                     {new Date(item.receivedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                   </Text>
+                ) : null}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );

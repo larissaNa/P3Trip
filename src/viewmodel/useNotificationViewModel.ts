@@ -1,17 +1,20 @@
 import { useEffect, useState, useCallback } from "react";
 import { Alert } from "react-native";
-import { getNotificationService } from "../di/container";
+import { getNotificationService, getTravelUseCases } from "../di/container";
 import { NotificationEntity } from "../model/entities/Notification";
+import { Travel } from "../model/entities/Travel";
 
 export interface NotificationViewModelProtocol {
   notifications: NotificationEntity[];
   loading: boolean;
   reload: () => Promise<void>;
   registerPush: () => Promise<void>;
+  handleNotificationPress: (notification: NotificationEntity) => Promise<Travel | null>;
 }
 
 export function useNotificationViewModel(): NotificationViewModelProtocol {
   const service = getNotificationService();
+  const travelUseCases = getTravelUseCases();
 
   const [notifications, setNotifications] = useState<NotificationEntity[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,10 +67,32 @@ export function useNotificationViewModel(): NotificationViewModelProtocol {
     }
   };
 
+  const handleNotificationPress = async (notification: NotificationEntity): Promise<Travel | null> => {
+    if (notification.data?.travel) {
+      return notification.data.travel;
+    }
+
+    if (notification.data?.travelId) {
+      try {
+        setLoading(true);
+        const travel = await travelUseCases.getTravelById(notification.data.travelId);
+        setLoading(false);
+        return travel;
+      } catch (e) {
+        console.error("Erro ao buscar viagem da notificação", e);
+        setLoading(false);
+        return null;
+      }
+    }
+    
+    return null;
+  };
+
   return {
     notifications,
     loading,
     reload: loadHistory,
     registerPush,
+    handleNotificationPress,
   };
 }
