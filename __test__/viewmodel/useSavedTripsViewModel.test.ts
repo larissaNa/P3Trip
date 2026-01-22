@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { useSavedTripsViewModel } from "../../src/viewmodel/useSavedTripsViewModel";
-import { TravelService } from "../../src/model/services/TravelService";
+import { getTravelUseCases } from "../../src/di/container";
 
 jest.mock("@react-navigation/native", () => {
   const React = require("react");
@@ -11,17 +11,16 @@ jest.mock("@react-navigation/native", () => {
   };
 });
 
-// Mock do Service
-jest.mock("../../src/model/services/TravelService");
+jest.mock("../../src/di/container");
 
 describe("useSavedTripsViewModel", () => {
   const mockListSavedTravels = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (TravelService as jest.Mock).mockImplementation(() => ({
+    (getTravelUseCases as jest.Mock).mockReturnValue({
       listSavedTravels: mockListSavedTravels,
-    }));
+    });
   });
 
   it("carrega viagens salvas no foco com sucesso", async () => {

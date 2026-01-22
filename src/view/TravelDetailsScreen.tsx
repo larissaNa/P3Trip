@@ -10,14 +10,19 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 
 import { useTravelDetailsViewModel } from "../viewmodel/useTravelDetailsViewModel";
+import { RootStackParamList } from "../navigator/AppNavigator";
+
+type TravelDetailsRouteProp = RouteProp<RootStackParamList, "TravelDetails">;
+type TravelDetailsNavProp = NativeStackNavigationProp<RootStackParamList, "TravelDetails">;
 
 export default function TravelDetailsScreen() {
-  const route = useRoute<any>();
-  const navigation = useNavigation<any>();
+  const route = useRoute<TravelDetailsRouteProp>();
+  const navigation = useNavigation<TravelDetailsNavProp>();
   const { travel } = route.params;
 
   const vm = useTravelDetailsViewModel(travel);

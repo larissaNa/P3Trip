@@ -1,19 +1,19 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { Linking } from 'react-native';
 import { useTravelDetailsViewModel } from '../../src/viewmodel/useTravelDetailsViewModel';
-import { TravelService } from '../../src/model/services/TravelService';
+import { getTravelUseCases } from '../../src/di/container';
 
 // Mock do Service
-jest.mock('../../src/model/services/TravelService');
+jest.mock('../../src/di/container');
 
 describe('useTravelDetailsViewModel', () => {
   const mockUpdateSavedStatus = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (TravelService as jest.Mock).mockImplementation(() => ({
+    (getTravelUseCases as jest.Mock).mockReturnValue({
       updateSavedStatus: mockUpdateSavedStatus,
-    }));
+    });
   });
 
   it('deve inicializar isSaved com o valor da viagem', () => {

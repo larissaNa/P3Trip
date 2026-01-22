@@ -1,9 +1,15 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 import { useSavedTripsViewModel } from "../viewmodel/useSavedTripsViewModel";
 import TravelCard from "../view/components/cards/TravelCard";
+import { RootStackParamList } from "../navigator/AppNavigator";
 
-export default function SavedTripsScreen({ navigation }: any) {
+type SavedTripsNavProp = NativeStackNavigationProp<RootStackParamList, "SavedTrips">;
+
+export default function SavedTripsScreen() {
+  const navigation = useNavigation<SavedTripsNavProp>();
   const vm = useSavedTripsViewModel();
 
   return (

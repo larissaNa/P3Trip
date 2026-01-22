@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Platform, Animated } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { Feather } from '@expo/vector-icons';
-import { TravelService } from '../../model/services/TravelService';
+import { getTravelUseCases } from '../../di/container';
 
 export const NetworkBanner = () => {
   const netInfo = useNetInfo();
@@ -10,7 +10,7 @@ export const NetworkBanner = () => {
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'offline' | 'online'>('offline');
   const [wasOffline, setWasOffline] = useState(false);
-  const travelService = new TravelService();
+  const travelUseCases = getTravelUseCases();
 
   // Animação para expandir/colapsar o texto
   const expandAnim = useRef(new Animated.Value(0)).current; 
@@ -65,7 +65,7 @@ export const NetworkBanner = () => {
       
       // Trigger sync
       console.log("NetworkBanner: Iniciando sincronização...");
-      travelService.syncPendingChanges().then(() => {
+      travelUseCases.syncPendingChanges().then(() => {
         console.log("NetworkBanner: Sincronização concluída");
         setWasOffline(false);
         
