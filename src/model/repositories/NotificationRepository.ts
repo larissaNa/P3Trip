@@ -1,30 +1,44 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NotificationEntity } from "../entities/Notification";
 
-const STORAGE_KEY = "@p3trip/notifications";
+const STORAGE_KEY: string = "@p3trip/notifications";
 
 export class NotificationRepository {
   async getAll(): Promise<NotificationEntity[]> {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    const raw: string | null = await AsyncStorage.getItem(STORAGE_KEY);
+
+    if (raw === null) {
+      return [];
+    }
 
     try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
+      const parsed: unknown = JSON.parse(raw);
+
+      return Array.isArray(parsed)
+        ? (parsed as NotificationEntity[])
+        : [];
+    } catch (_error: unknown) {
       return [];
     }
   }
 
   async saveAll(notifications: NotificationEntity[]): Promise<void> {
-    await AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(notifications.slice(0, 50))
-    );
+    const limitedNotifications: NotificationEntity[] =
+      notifications.slice(0, 50);
+
+    const serialized: string = JSON.stringify(limitedNotifications);
+
+    await AsyncStorage.setItem(STORAGE_KEY, serialized);
   }
 
   async append(notification: NotificationEntity): Promise<void> {
-    const current = await this.getAll();
-    await this.saveAll([notification, ...current]);
+    const current: NotificationEntity[] = await this.getAll();
+
+    const next: NotificationEntity[] = [
+      notification,
+      ...current,
+    ];
+
+    await this.saveAll(next);
   }
 }

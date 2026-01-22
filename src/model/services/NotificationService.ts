@@ -7,30 +7,32 @@ import { NotificationRepository } from "../repositories/NotificationRepository";
 import { NotificationEntity } from "../entities/Notification";
 
 export class NotificationService {
-  private repo = new NotificationRepository();
+  private repo: NotificationRepository = new NotificationRepository();
 
   async registerForPushNotifications(): Promise<string> {
     if (!Device.isDevice) {
       throw new Error("DEVICE_NOT_SUPPORTED");
     }
 
-    const permission = await this.ensurePermissions();
+    const permission: boolean = await this.ensurePermissions();
     if (!permission) {
       throw new Error("PERMISSION_DENIED");
     }
 
-    const token = await this.getPushToken();
+    const token: string = await this.getPushToken();
     await this.setupAndroidChannel();
     return token;
   }
 
   async registerAndSavePushToken(): Promise<string> {
-    const token = await this.registerForPushNotifications();
+    const token: string = await this.registerForPushNotifications();
 
-    const { error } = await supabase.from("push_tokens").upsert(
-      [{ token, updated_at: new Date().toISOString() }],
-      { onConflict: "token" }
-    );
+    const { error }: { error: Error | null } = await supabase
+      .from("push_tokens")
+      .upsert(
+        [{ token, updated_at: new Date().toISOString() }],
+        { onConflict: "token" }
+      );
 
     if (error) {
       throw new Error("SUPABASE_ERROR");
@@ -39,7 +41,9 @@ export class NotificationService {
     return token;
   }
 
-  async saveNotification(notification: Notifications.Notification) {
+  async saveNotification(
+    notification: Notifications.Notification
+  ): Promise<void> {
     const entity: NotificationEntity = {
       id: notification.request.identifier || String(Date.now()),
       title: notification.request.content.title ?? "",
@@ -59,13 +63,13 @@ export class NotificationService {
     onReceive: (notification: Notifications.Notification) => void,
     onResponse: (response: Notifications.NotificationResponse) => void
   ): () => void {
-    const receiveSub =
+    const receiveSub: Notifications.Subscription =
       Notifications.addNotificationReceivedListener(onReceive);
 
-    const responseSub =
+    const responseSub: Notifications.Subscription =
       Notifications.addNotificationResponseReceivedListener(onResponse);
 
-    return () => {
+    return (): void => {
       receiveSub.remove();
       responseSub.remove();
     };
@@ -74,29 +78,39 @@ export class NotificationService {
   // ===== PRIVATE =====
 
   private async ensurePermissions(): Promise<boolean> {
-    const { status } = await Notifications.getPermissionsAsync();
+    const {
+      status,
+    }: Notifications.NotificationPermissionsStatus =
+      await Notifications.getPermissionsAsync();
+
     if (status === "granted") return true;
 
-    const request = await Notifications.requestPermissionsAsync({
-      ios: { allowAlert: true, allowBadge: true, allowSound: true },
-    });
+    const request: Notifications.NotificationPermissionsStatus =
+      await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+        },
+      });
 
     return request.status === "granted";
   }
 
   private async getPushToken(): Promise<string> {
-    const projectId =
+    const projectId: string | undefined =
       Constants?.expoConfig?.extra?.eas?.projectId ??
       Constants?.easConfig?.projectId;
 
-    const token = await Notifications.getExpoPushTokenAsync(
-      projectId ? { projectId } : {}
-    );
+    const token: Notifications.ExpoPushToken =
+      await Notifications.getExpoPushTokenAsync(
+        projectId ? { projectId } : {}
+      );
 
     return token.data;
   }
 
-  private async setupAndroidChannel() {
+  private async setupAndroidChannel(): Promise<void> {
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
         name: "default",

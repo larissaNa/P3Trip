@@ -1,24 +1,46 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { Animated, LayoutChangeEvent, ScrollView } from "react-native";
+import {
+  Animated,
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+} from "react-native";
 import { Travel } from "../model/entities/Travel";
 import { TravelService } from "../model/services/TravelService";
 
-export const HomeViewModel = () => {
+export interface HomeViewModelProtocol {
+  travelData: Travel[];
+  loading: boolean;
+  search: (query: string) => void;
+  reload: () => Promise<void>;
+  scrollY: Animated.Value;
+  onScroll: (
+    event: NativeSyntheticEvent<NativeScrollEvent> | { nativeEvent: any }
+  ) => void;
+  showScrollTop: boolean;
+  scrollToTop: () => void;
+  navbarHeight: number;
+  onNavbarLayout: (event: LayoutChangeEvent) => void;
+  scrollViewRef: React.RefObject<ScrollView | null>;
+}
+
+export const HomeViewModel = (): HomeViewModelProtocol => {
   const service = new TravelService();
 
   /* ======================
    * DATA
    * ====================== */
   const [rawTravels, setRawTravels] = useState<Travel[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   /* ======================
    * UI STATE
    * ====================== */
-  const [navbarHeight, setNavbarHeight] = useState(0);
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [navbarHeight, setNavbarHeight] = useState<number>(0);
+  const [showScrollTop, setShowScrollTop] = useState<boolean>(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -26,7 +48,7 @@ export const HomeViewModel = () => {
   /* ======================
    * LOAD
    * ====================== */
-  const loadTravels = async () => {
+  const loadTravels = async (): Promise<void> => {
     setLoading(true);
     try {
       const travels = await service.listAllTravels();
@@ -47,11 +69,11 @@ export const HomeViewModel = () => {
   /* ======================
    * SEARCH
    * ====================== */
-  const search = (query: string) => {
+  const search = (query: string): void => {
     setSearchQuery(query);
   };
 
-  const filteredTravels = useMemo(() => {
+  const filteredTravels = useMemo<Travel[]>(() => {
     if (!searchQuery.trim()) return rawTravels;
 
     const lower = searchQuery.toLowerCase();
@@ -69,18 +91,18 @@ export const HomeViewModel = () => {
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     {
       useNativeDriver: false,
-      listener: (event: any) => {
+      listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const offsetY = event.nativeEvent.contentOffset.y;
         setShowScrollTop(offsetY > 300);
       },
     }
   );
 
-  const scrollToTop = () => {
+  const scrollToTop = (): void => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  const onNavbarLayout = (event: LayoutChangeEvent) => {
+  const onNavbarLayout = (event: LayoutChangeEvent): void => {
     setNavbarHeight(event.nativeEvent.layout.height);
   };
 
