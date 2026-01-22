@@ -1,27 +1,45 @@
 import { useState, useMemo, useCallback } from "react";
-import { Dimensions, Linking, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import {
+  Dimensions,
+  Linking,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+} from "react-native";
 import { TravelService } from "../model/services/TravelService";
 import { Travel } from "../model/entities/Travel";
 
-export function useTravelDetailsViewModel(travel: Travel) {
+export interface TravelDetailsViewModelProtocol {
+  isSaved: boolean;
+  currentImageIndex: number;
+  screenWidth: number;
+  hasMultipleImages: boolean;
+  carouselItemWidth: number;
+  onCarouselScrollEnd: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  toggleSave: () => Promise<void>;
+  openWhatsApp: () => void;
+}
+
+export function useTravelDetailsViewModel(
+  travel: Travel
+): TravelDetailsViewModelProtocol {
   const service = new TravelService();
 
   /* =======================
    * STATE
    * ======================= */
-  const [isSaved, setIsSaved] = useState(travel.saved);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isSaved, setIsSaved] = useState<boolean>(travel.saved);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
   /* =======================
    * DERIVED DATA
    * ======================= */
   const screenWidth = Dimensions.get("window").width;
 
-  const hasMultipleImages = useMemo(() => {
+  const hasMultipleImages = useMemo<boolean>(() => {
     return Array.isArray(travel.images) && travel.images.length > 1;
   }, [travel.images]);
 
-  const carouselItemWidth = useMemo(() => {
+  const carouselItemWidth = useMemo<number>(() => {
     return screenWidth - 32 + 16;
   }, [screenWidth]);
 
@@ -29,7 +47,7 @@ export function useTravelDetailsViewModel(travel: Travel) {
    * ACTIONS
    * ======================= */
   const onCarouselScrollEnd = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    (event: NativeSyntheticEvent<NativeScrollEvent>): void => {
       const offsetX = event.nativeEvent.contentOffset.x;
       const index = Math.round(offsetX / carouselItemWidth);
       setCurrentImageIndex(index);
@@ -37,7 +55,7 @@ export function useTravelDetailsViewModel(travel: Travel) {
     [carouselItemWidth]
   );
 
-  const toggleSave = useCallback(async () => {
+  const toggleSave = useCallback(async (): Promise<void> => {
     const previous = isSaved;
     const next = !previous;
 
@@ -51,7 +69,7 @@ export function useTravelDetailsViewModel(travel: Travel) {
     }
   }, [isSaved, travel.id]);
 
-  const openWhatsApp = useCallback(() => {
+  const openWhatsApp = useCallback((): void => {
     const phone = "5586999653516";
     const message = `Olá! Quero reservar o pacote: ${travel.title}`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;

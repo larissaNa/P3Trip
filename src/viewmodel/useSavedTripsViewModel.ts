@@ -5,13 +5,19 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Travel } from "../model/entities/Travel";
 import { TravelService } from "../model/services/TravelService";
 
-export const useSavedTripsViewModel = () => {
+export interface SavedTripsViewModelProtocol {
+  savedTrips: Travel[];
+  loading: boolean;
+  reload: () => Promise<void>;
+}
+
+export const useSavedTripsViewModel = (): SavedTripsViewModelProtocol => {
   const service = new TravelService();
 
   const [savedTrips, setSavedTrips] = useState<Travel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const loadSaved = async () => {
+  const loadSaved = async (): Promise<void> => {
     setLoading(true);
     try {
       const data = await service.listSavedTravels();
