@@ -1,4 +1,4 @@
-import { OfflineStorageService } from '../../src/model/services/OfflineStorageService';
+import { OfflineStorageService } from '../../src/infra/services/offlineStorageService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 describe('OfflineStorageService', () => {

@@ -1,9 +1,8 @@
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { HomeViewModel } from '../../src/viewmodel/useHomeViewModel';
-import { TravelService } from '../../src/model/services/TravelService';
+import { getTravelUseCases } from '../../src/di/container';
 
-// Mock do Service
-jest.mock('../../src/model/services/TravelService');
+jest.mock('../../src/di/container');
 
 // Mock do React Navigation
 jest.mock('@react-navigation/native', () => {
@@ -54,9 +53,9 @@ describe('HomeViewModel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (TravelService as jest.Mock).mockImplementation(() => ({
+    (getTravelUseCases as jest.Mock).mockReturnValue({
       listAllTravels: jest.fn().mockResolvedValue(mockTravels),
-    }));
+    });
   });
 
   it('deve filtrar viagens por termo comum (ex: "praia")', async () => {

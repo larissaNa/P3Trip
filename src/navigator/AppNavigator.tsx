@@ -1,10 +1,18 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Travel } from "../model/entities/Travel";
 import HomeScreen from "../view/HomeScreen";
 import NotificationsScreen from "../view/NotificationsScreen";
 import SavedTripsScreen from "../view/SavedTripsScreen";
 import TravelDetailsScreen from "../view/TravelDetailsScreen";
 
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+  Home: undefined;
+  Notifications: undefined;
+  SavedTrips: undefined;
+  TravelDetails: { travel: Travel };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   return (

@@ -9,15 +9,19 @@ import {
   Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 
 import Navbar from "./components/navbar/Navbar";
 import TravelCard from "./components/cards/TravelCard";
 import { HomeViewModel } from "../viewmodel/useHomeViewModel";
+import { RootStackParamList } from "../navigator/AppNavigator";
+
+type HomeNavProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 export default function HomeScreen() {
   const vm = HomeViewModel();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<HomeNavProp>();
 
   return (
     <View style={{ flex: 1, backgroundColor: "#a7c9ffff" }}>

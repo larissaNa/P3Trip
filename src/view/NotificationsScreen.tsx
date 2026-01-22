@@ -1,8 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNotificationViewModel } from "../viewmodel/useNotificationViewModel";
+import { RootStackParamList } from "../navigator/AppNavigator";
 
-export default function NotificationsScreen({ navigation }: any) {
+type NotificationsNavProp = NativeStackNavigationProp<RootStackParamList, "Notifications">;
+
+export default function NotificationsScreen() {
+  const navigation = useNavigation<NotificationsNavProp>();
   const vm = useNotificationViewModel();
 
   return (

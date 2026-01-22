@@ -5,7 +5,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from "react-native";
-import { TravelService } from "../model/services/TravelService";
+import { getTravelUseCases } from "../di/container";
 import { Travel } from "../model/entities/Travel";
 
 export interface TravelDetailsViewModelProtocol {
@@ -22,7 +22,7 @@ export interface TravelDetailsViewModelProtocol {
 export function useTravelDetailsViewModel(
   travel: Travel
 ): TravelDetailsViewModelProtocol {
-  const service = new TravelService();
+  const usecases = getTravelUseCases();
 
   /* =======================
    * STATE
@@ -62,7 +62,7 @@ export function useTravelDetailsViewModel(
     setIsSaved(next);
 
     try {
-      const ok = await service.updateSavedStatus(travel.id, next);
+      const ok = await usecases.updateSavedStatus(travel.id, next);
       if (!ok) setIsSaved(previous);
     } catch {
       setIsSaved(previous);

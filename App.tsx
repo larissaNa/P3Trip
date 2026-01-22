@@ -7,9 +7,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { NotificationService } from "./src/model/services/NotificationService";
 import * as Notifications from "expo-notifications";
-import { TravelService } from "./src/model/services/TravelService";
+import { getNotificationService, getTravelUseCases } from "./src/di/container";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,36 +40,29 @@ export default function App() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    const notificationService = new NotificationService();
+    const notificationService = getNotificationService();
     notificationService.registerAndSavePushToken();
   }, []);
 
   useEffect(() => {
-    const notificationService = new NotificationService();
-    const travelService = new TravelService();
+    const notificationService = getNotificationService();
+    const travelUseCases = getTravelUseCases();
 
-    const cleanup = notificationService.setupNotificationListeners(
-      async (notification) => {
-        await notificationService.appendNotificationToHistory(notification);
+    const cleanup = notificationService.setupListeners(
+      async (notification: { id?: string; title?: string; body?: string; data?: unknown }) => {
+        await notificationService.saveNotification(notification);
       },
-      async (response) => {
-        const data: any = response.notification.request.content.data;
-        console.log("🔔 Notificação tocada, dados:", data);
-        
-        await notificationService.appendNotificationToHistory(response.notification);
-
+      async (response: any) => {
+        const data: any = response?.notification?.request?.content?.data;
         const type = data?.type;
         const travelId = data?.travelId;
-
         if (type === "NEW_TRAVEL" && travelId && navigationRef.isReady()) {
           try {
-            const travel = await travelService.getTravelById(String(travelId));
+            const travel = await travelUseCases.getTravelById(String(travelId));
             if (travel) {
               navigationRef.navigate("TravelDetails", { travel });
             }
-          } catch (error) {
-             console.log("Erro ao navegar via notificação:", error);
-          }
+          } catch (_error) {}
         }
       }
     );

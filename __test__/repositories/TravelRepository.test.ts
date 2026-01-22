@@ -1,15 +1,15 @@
-import { TravelRepository } from '../../src/model/repositories/TravelRepository';
+import { SupabaseTravelRepository } from '../../src/infra/repositories/supabaseTravelRepository';
 import { supabase } from '../../src/infra/supabase/supabase';
 
 // Mock do supabase
 jest.mock('../../src/infra/supabase/supabase');
 
 describe('TravelRepository', () => {
-  let repository: TravelRepository;
+  let repository: SupabaseTravelRepository;
   const mockFrom = supabase.from as jest.Mock;
 
   beforeEach(() => {
-    repository = new TravelRepository();
+    repository = new SupabaseTravelRepository();
     jest.clearAllMocks();
   });
 

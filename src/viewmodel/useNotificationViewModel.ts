@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Alert } from "react-native";
-import { NotificationService } from "../model/services/NotificationService";
+import { getNotificationService } from "../di/container";
 import { NotificationEntity } from "../model/entities/Notification";
-import * as Notifications from "expo-notifications";
 
 export interface NotificationViewModelProtocol {
   notifications: NotificationEntity[];
@@ -12,7 +11,7 @@ export interface NotificationViewModelProtocol {
 }
 
 export function useNotificationViewModel(): NotificationViewModelProtocol {
-  const service = new NotificationService();
+  const service = getNotificationService();
 
   const [notifications, setNotifications] = useState<NotificationEntity[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -41,7 +40,7 @@ export function useNotificationViewModel(): NotificationViewModelProtocol {
     loadHistory();
 
     const unsubscribe = service.setupListeners(
-      async (notification) => {
+      async (notification: { id?: string; title?: string; body?: string; data?: unknown }) => {
         await service.saveNotification(notification);
         loadHistory();
       },

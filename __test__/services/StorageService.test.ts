@@ -1,4 +1,4 @@
-import { StorageService } from '../../src/model/services/StorageService';
+import { StorageService } from '../../src/infra/services/storageService';
 import { supabase } from '../../src/infra/supabase/supabase';
 
 jest.mock('../../src/infra/supabase/supabase');

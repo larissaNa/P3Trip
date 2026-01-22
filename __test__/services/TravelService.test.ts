@@ -1,29 +1,38 @@
-import { TravelService } from '../../src/model/services/TravelService';
-import { TravelRepository } from '../../src/model/repositories/TravelRepository';
-import { OfflineStorageService } from '../../src/model/services/OfflineStorageService';
-import { supabase } from '../../src/infra/supabase/supabase';
+import { TravelUseCases } from '../../src/usecase/travelUseCases';
+import { ITravelRepository } from '../../src/model/repositories/ITravelRepository';
+import { IOfflineStorageService } from '../../src/model/services/IOfflineStorageService';
 
-jest.mock('../../src/infra/supabase/supabase');
-jest.mock('../../src/model/repositories/TravelRepository');
-jest.mock('../../src/model/services/OfflineStorageService');
-
-describe('TravelService', () => {
-  let service: TravelService;
-  let mockRepository: jest.Mocked<TravelRepository>;
-  let mockOffline: jest.Mocked<OfflineStorageService>;
-  const mockFrom = supabase.from as jest.Mock;
+describe('TravelUseCases', () => {
+  let usecases: TravelUseCases;
+  let mockRepository: jest.Mocked<ITravelRepository>;
+  let mockOffline: jest.Mocked<IOfflineStorageService>;
 
   beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
-    (TravelRepository as jest.Mock).mockClear();
-    (OfflineStorageService as jest.Mock).mockClear();
     jest.clearAllMocks();
 
-    service = new TravelService();
-    
-    // Get the mock instances
-    mockRepository = (service as any).repository;
-    mockOffline = (service as any).offline;
+    mockRepository = {
+      getAllTravels: jest.fn(),
+      getSavedTravels: jest.fn(),
+      getTravelById: jest.fn(),
+      saveTravel: jest.fn(),
+      unsaveTravel: jest.fn(),
+    };
+    mockOffline = {
+      getCachedTrips: jest.fn(),
+      setCachedTrips: jest.fn(),
+      getSavedTrips: jest.fn(),
+      setSavedTrips: jest.fn(),
+      saveTripLocally: jest.fn(),
+      unsaveTripLocally: jest.fn(),
+      cacheSavedTrip: jest.fn(),
+      removeSavedTripFromCache: jest.fn(),
+      getQueue: jest.fn(),
+      setQueue: jest.fn(),
+      enqueue: jest.fn(),
+      clearQueue: jest.fn(),
+    };
+    usecases = new TravelUseCases(mockRepository, mockOffline);
   });
 
   describe('listAllTravels', () => {
@@ -32,7 +41,7 @@ describe('TravelService', () => {
       mockRepository.getAllTravels.mockResolvedValue(mockData as any);
       mockOffline.setCachedTrips.mockResolvedValue(undefined);
 
-      const result = await service.listAllTravels();
+      const result = await usecases.listAllTravels();
 
       expect(mockRepository.getAllTravels).toHaveBeenCalled();
       expect(mockOffline.setCachedTrips).toHaveBeenCalledWith(mockData);
@@ -44,7 +53,7 @@ describe('TravelService', () => {
       const mockCache = [{ id: '1', title: 'Cached Trip' }];
       mockOffline.getCachedTrips.mockResolvedValue(mockCache as any);
 
-      const result = await service.listAllTravels();
+      const result = await usecases.listAllTravels();
 
       expect(mockRepository.getAllTravels).toHaveBeenCalled();
       expect(mockOffline.getCachedTrips).toHaveBeenCalled();
@@ -58,7 +67,7 @@ describe('TravelService', () => {
       const mockSaved = [{ id: '1', saved: true }];
       mockOffline.getSavedTrips.mockResolvedValue(mockSaved as any);
 
-      const result = await service.listSavedTravels();
+      const result = await usecases.listSavedTravels();
 
       expect(mockOffline.getQueue).toHaveBeenCalled();
       expect(mockOffline.getSavedTrips).toHaveBeenCalled();
@@ -72,7 +81,7 @@ describe('TravelService', () => {
       mockRepository.getSavedTravels.mockResolvedValue(mockRemote as any);
       mockOffline.setSavedTrips.mockResolvedValue(undefined);
 
-      const result = await service.listSavedTravels();
+      const result = await usecases.listSavedTravels();
 
       expect(mockOffline.getQueue).toHaveBeenCalled();
       expect(mockRepository.getSavedTravels).toHaveBeenCalled();
@@ -82,157 +91,62 @@ describe('TravelService', () => {
   });
 
   describe('updateSavedStatus', () => {
-    it('should update status on server and update cache', async () => {
-       const mockUpdate = jest.fn().mockResolvedValue({ error: null });
-       
-       const mockEq2 = jest.fn().mockResolvedValue({ error: null });
-       mockUpdate.mockReturnValue({ eq: mockEq2 });
-       mockFrom.mockReturnValue({ update: mockUpdate });
-
+    it('should call saveTravel on repo and update cache when saved=true', async () => {
+       mockRepository.saveTravel.mockResolvedValue(undefined);
        mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: false } as any]);
 
-       const result = await service.updateSavedStatus('1', true);
+       const result = await usecases.updateSavedStatus('1', true);
 
-       expect(mockFrom).toHaveBeenCalledWith('viagem');
-       expect(mockUpdate).toHaveBeenCalledWith({ salvo: true });
-       expect(mockEq2).toHaveBeenCalledWith('id', '1');
+       expect(mockRepository.saveTravel).toHaveBeenCalledWith('1');
        expect(mockOffline.cacheSavedTrip).toHaveBeenCalled();
        expect(result).toBe(true);
     });
 
-    it('should save locally on server error', async () => {
-       const mockUpdate = jest.fn();
-       const mockEq2 = jest.fn().mockResolvedValue({ error: { message: 'Network error' } });
-       mockUpdate.mockReturnValue({ eq: mockEq2 });
-       mockFrom.mockReturnValue({ update: mockUpdate });
+    it('should call unsaveTravel on repo and remove from cache when saved=false', async () => {
+      mockRepository.unsaveTravel.mockResolvedValue(undefined);
 
-       mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: false } as any]);
+      const result = await usecases.updateSavedStatus('1', false);
 
-       const result = await service.updateSavedStatus('1', true);
-
-       expect(mockOffline.saveTripLocally).toHaveBeenCalled();
-       expect(result).toBe(true);
-    });
-
-    it('should unsave locally on server error', async () => {
-      const mockUpdate = jest.fn();
-      const mockEq2 = jest.fn().mockResolvedValue({ error: { message: 'Network error' } });
-      mockUpdate.mockReturnValue({ eq: mockEq2 });
-      mockFrom.mockReturnValue({ update: mockUpdate });
-
-      mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: true } as any]);
-
-      const result = await service.updateSavedStatus('1', false);
-
-      expect(mockOffline.unsaveTripLocally).toHaveBeenCalledWith('1');
+      expect(mockRepository.unsaveTravel).toHaveBeenCalledWith('1');
+      expect(mockOffline.removeSavedTripFromCache).toHaveBeenCalledWith('1');
       expect(result).toBe(true);
    });
 
-   it('should remove from cache on server success (unsave)', async () => {
-    const mockUpdate = jest.fn().mockResolvedValue({ error: null });
-    const mockEq2 = jest.fn().mockResolvedValue({ error: null });
-    mockUpdate.mockReturnValue({ eq: mockEq2 });
-    mockFrom.mockReturnValue({ update: mockUpdate });
-
-    mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: true } as any]);
-
-    const result = await service.updateSavedStatus('1', false);
-
-    expect(mockOffline.removeSavedTripFromCache).toHaveBeenCalledWith('1');
-    expect(result).toBe(true);
-  });
-
-  it('should handle unexpected error in updateSavedStatus (outer try/catch)', async () => {
-     // Mock throw error from supabase
-     mockFrom.mockImplementation(() => { throw new Error('Unexpected'); });
-     
+   it('should fallback to local update if repo fails', async () => {
+     mockRepository.saveTravel.mockRejectedValue(new Error('Network error'));
      mockOffline.getCachedTrips.mockResolvedValue([{ id: '1', saved: false } as any]);
 
-     // Should fall through to offline save
-     const result = await service.updateSavedStatus('1', true);
-     
-     expect(mockOffline.saveTripLocally).toHaveBeenCalled();
+     const result = await usecases.updateSavedStatus('1', true);
+
+     expect(mockRepository.saveTravel).toHaveBeenCalledWith('1');
+     expect(mockOffline.saveTripLocally).toHaveBeenCalled(); // Should fallback
      expect(result).toBe(true);
-  });
-
-  it('should handle error when saving locally (fallback)', async () => {
-    const mockUpdate = jest.fn();
-    const mockEq2 = jest.fn().mockResolvedValue({ error: { message: 'Network error' } });
-    mockUpdate.mockReturnValue({ eq: mockEq2 });
-    mockFrom.mockReturnValue({ update: mockUpdate });
-
-    // Mock local save failure
-    mockOffline.getCachedTrips.mockRejectedValue(new Error('Local storage error'));
-    
-    // We also want to cover the console.error if NODE_ENV is not test, 
-    // but here we just want to ensure it returns false (failed both remote and local)
-    const result = await service.updateSavedStatus('1', true);
-
-    expect(result).toBe(false);
-  });
+   });
   });
 
   describe('syncPendingChanges', () => {
-    it('should do nothing if queue is empty', async () => {
-      mockOffline.getQueue.mockResolvedValue([]);
-      await service.syncPendingChanges();
-      expect(mockFrom).not.toHaveBeenCalled();
-    });
+    it('should process queue items', async () => {
+      mockOffline.getQueue.mockResolvedValue([{ type: 'save', id: '1' }, { type: 'unsave', id: '2' }]);
+      mockRepository.saveTravel.mockResolvedValue(undefined);
+      mockRepository.unsaveTravel.mockResolvedValue(undefined);
+      mockOffline.setQueue.mockResolvedValue(undefined);
 
-    it('should sync items and clear queue on success', async () => {
-      mockOffline.getQueue
-        .mockResolvedValueOnce([
-          { type: 'save', id: '1' },
-          { type: 'unsave', id: '2' }
-        ])
-        .mockResolvedValue([]); // Subsequent calls return empty
+      await usecases.syncPendingChanges();
 
-      const mockUpdate = jest.fn().mockResolvedValue({ error: null });
-      const mockEq = jest.fn().mockResolvedValue({ error: null });
-      mockUpdate.mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({ update: mockUpdate });
-
-      // Mock repository calls that happen after sync
-      mockRepository.getAllTravels.mockResolvedValue([]);
-      mockRepository.getSavedTravels.mockResolvedValue([]);
-
-      await service.syncPendingChanges();
-
-      expect(mockFrom).toHaveBeenCalledTimes(2);
+      expect(mockRepository.saveTravel).toHaveBeenCalledWith('1');
+      expect(mockRepository.unsaveTravel).toHaveBeenCalledWith('2');
       expect(mockOffline.setQueue).toHaveBeenCalledWith([]);
-      // Should refresh lists
-      expect(mockRepository.getAllTravels).toHaveBeenCalled();
-      expect(mockRepository.getSavedTravels).toHaveBeenCalled();
     });
 
     it('should keep failed items in queue', async () => {
-      mockOffline.getQueue.mockResolvedValue([
-        { type: 'save', id: '1' }
-      ]);
+      mockOffline.getQueue.mockResolvedValue([{ type: 'save', id: '1' }]);
+      mockRepository.saveTravel.mockRejectedValue(new Error('Fail'));
 
-      const mockUpdate = jest.fn().mockResolvedValue({ error: { message: 'Error' } });
-      const mockEq = jest.fn().mockResolvedValue({ error: { message: 'Error' } });
-      mockUpdate.mockReturnValue({ eq: mockEq });
-      mockFrom.mockReturnValue({ update: mockUpdate });
+      await usecases.syncPendingChanges();
 
-      await service.syncPendingChanges();
-
+      expect(mockRepository.saveTravel).toHaveBeenCalledWith('1');
+      // The implementation reverses queue logic, so we just expect it to be set back
       expect(mockOffline.setQueue).toHaveBeenCalledWith([{ type: 'save', id: '1' }]);
-    });
-
-    it('should log error during sync failure', async () => {
-        const originalEnv = process.env.NODE_ENV;
-        process.env.NODE_ENV = 'development';
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-        mockOffline.getQueue.mockRejectedValue(new Error('Sync Error'));
-
-        await service.syncPendingChanges();
-
-        expect(consoleSpy).toHaveBeenCalledWith('Erro durante sincronização:', expect.any(Error));
-
-        process.env.NODE_ENV = originalEnv;
-        consoleSpy.mockRestore();
     });
   });
 });

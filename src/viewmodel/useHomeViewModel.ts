@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Travel } from "../model/entities/Travel";
-import { TravelService } from "../model/services/TravelService";
+import { getTravelUseCases } from "../di/container";
 
 export interface HomeViewModelProtocol {
   travelData: Travel[];
@@ -27,7 +27,7 @@ export interface HomeViewModelProtocol {
 }
 
 export const HomeViewModel = (): HomeViewModelProtocol => {
-  const service = new TravelService();
+  const usecases = getTravelUseCases();
 
   /* ======================
    * DATA
@@ -51,7 +51,7 @@ export const HomeViewModel = (): HomeViewModelProtocol => {
   const loadTravels = async (): Promise<void> => {
     setLoading(true);
     try {
-      const travels = await service.listAllTravels();
+      const travels = await usecases.listAllTravels();
       setRawTravels(travels);
     } catch {
       setRawTravels([]);
