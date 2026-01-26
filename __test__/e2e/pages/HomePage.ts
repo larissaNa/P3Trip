@@ -56,6 +56,28 @@ export class HomePage {
     return textos;
   }
 
+  /**
+   * Clica no primeiro item de viagem encontrado na lista
+   */
+  async clicarEmPrimeiraViagem(): Promise<void> {
+    const items = await this.resolverItensViagem();
+    
+    // Tenta encontrar um card real filtrando por texto comum (ex: "R$")
+    // Isso evita clicar em botões da navbar se o seletor for genérico
+    const cards = items.filter({ hasText: 'R$' });
+    
+    if (await cards.count() > 0) {
+      await cards.first().click();
+    } else {
+      // Fallback: clica no primeiro item genérico encontrado
+      const count = await items.count();
+      if (count === 0) {
+        throw new Error('Nenhuma viagem encontrada para clicar.');
+      }
+      await items.first().click();
+    }
+  }
+
   private async resolverCampoBusca(): Promise<Locator> {
     for (const sel of this.searchSelectors) {
       const loc = this.page.locator(sel).first();
