@@ -71,21 +71,24 @@ Para executar este projeto localmente, siga os passos abaixo:
 
 ## Estrutura do Projeto
 
-A estrutura de pastas segue uma arquitetura limpa e modular:
+A estrutura de pastas reflete a separação de responsabilidades da arquitetura:
 
 ```
 src/
-├── infra/          # Configurações de infraestrutura (ex: Supabase)
-├── model/          # Camada de Dados
-│   ├── entities/     # Definições de tipos e interfaces (Models)
-│   ├── repositories/ # Acesso a dados (API/Local)
-│   └── services/     # Regras de negócio e orquestração de dados
-├── view/           # Camada de Apresentação (UI)
-│   ├── components/   # Componentes reutilizáveis (Cards, Navbar)
-│   └── *.tsx         # Telas da aplicação (Screens)
-├── viewmodel/      # Camada de Lógica de Apresentação (Hooks)
-│   └── *.ts          # Lógica de estado e interação das telas
-└── navigator/      # Configuração de rotas e navegação
+├── di/               # Injeção de Dependência (Container)
+├── infra/            # Implementações de Infraestrutura (Supabase, LocalStorage)
+│   ├── repositories/ # Implementação dos Repositórios
+│   └── services/     # Implementação dos Serviços Externos
+├── model/            # Definições do Domínio (Interfaces e Entidades)
+│   ├── entities/     # Modelos de Dados (Types/Classes)
+│   ├── repositories/ # Interfaces dos Repositórios
+│   └── services/     # Interfaces dos Serviços
+├── usecase/          # Casos de Uso (Lógica de Aplicação)
+├── view/             # Camada de Apresentação (UI)
+│   ├── components/   # Componentes Reutilizáveis
+│   └── *.tsx         # Telas (Screens)
+├── viewmodel/        # Lógica de Estado da View (Hooks)
+└── navigator/        # Configuração de Rotas e Navegação
 ```
 
 ## Documentação de Testes
@@ -94,9 +97,9 @@ src/
 O projeto adota uma estratégia de testes focada na **garantia da lógica de negócios** e **resiliência da interface**. Utilizamos **Jest** como runner e **React Test Renderer** para testar Hooks e Componentes.
 
 ### Distribuição de Testes (Unitários vs Integração)
-- **Testes Unitários (Maioria):** Focados na camada `ViewModel`, `Services` e `Repositories`.
-  - *Justificativa:* A lógica complexa de estado, manipulação de dados e regras de negócio reside aqui. Testes unitários são rápidos e isolam falhas com precisão.
-- **Testes de Integração:** Validam o fluxo completo entre as camadas **View ↔ ViewModel ↔ Services ↔ Repositories**.
+- **Testes Unitários (Maioria):** Focados na camada `ViewModel`, `Use Cases` e `Services`.
+  - *Justificativa:* A lógica complexa de estado, regras de negócio e orquestração reside aqui.
+- **Testes de Integração:** Validam o fluxo completo `View` ↔ `ViewModel` ↔ `Use Cases` ↔ `Infra`.
   - *Localização:* `__test__/integration/`
   - *Justificativa:* Garantem que a interface do usuário (View) interage corretamente com a lógica de negócios e persistência, simulando cenários reais de uso (ex: carregar lista, favoritar viagem, persistência offline) utilizando mocks para dependências externas (Supabase, Navegação).
 
